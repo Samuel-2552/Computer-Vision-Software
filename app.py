@@ -29,6 +29,10 @@ class FlaskThread(QThread):
         @self.flask_app.route("/existing_project")
         def existing_project():
             return render_template('existing_project.html')
+        
+        @self.flask_app.route("/productKey")
+        def productKey():
+            return render_template('productKey.html')
             
         self.flask_app.run(host='127.0.0.1', port=54321, threaded=True, request_handler=WSGIRequestHandler)
 
@@ -79,6 +83,14 @@ class Browser(QMainWindow):
         exitAction.triggered.connect(self.close)
         fileMenu.addAction(exitAction)
 
+
+        # Create a "Activate License" menu
+        activate = menubar.addMenu('Activate License')
+
+        productKey = QAction(QIcon('static/img/key.png'), 'Product Key', self)
+        productKey.triggered.connect(self.product_key)
+        activate.addAction(productKey)
+
     # Define a custom signal for closing the Flask app
     closing = pyqtSignal()
 
@@ -89,6 +101,10 @@ class Browser(QMainWindow):
     def open_existing_project(self):
         # Redirect to the Flask route for existing project
         self.browser.setUrl(QUrl("http://127.0.0.1:54321/existing_project"))
+
+    def product_key(self):
+        # Redirect to the Flask route for product key
+        self.browser.setUrl(QUrl("http://127.0.0.1:54321/productKey"))
 
     def closeEvent(self, event):
         # Emit the closing signal when the main window is closed
