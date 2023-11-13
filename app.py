@@ -3,6 +3,7 @@ import os
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtWebEngineWidgets import *
+from PyQt5.QtGui import QContextMenuEvent
 from flask import Flask
 from werkzeug.serving import WSGIRequestHandler
 import signal
@@ -37,6 +38,9 @@ class Browser(QMainWindow):
         # Connect the close event of the main window to the stop_flask method
         self.closing.connect(self.stop_flask)
 
+        # Connect the loadFinished signal to inject JavaScript after the page is loaded
+        self.browser.loadFinished.connect(self.inject_disable_context_menu)
+
     # Define a custom signal for closing the Flask app
     closing = pyqtSignal()
 
@@ -51,6 +55,16 @@ class Browser(QMainWindow):
         # Wait for the Flask thread to finish
         self.flask_thread.quit()
         self.flask_thread.wait()
+
+    def inject_disable_context_menu(self, ok):
+        if ok:
+            # Inject JavaScript to disable the context menu when the webpage is loaded
+            script = """
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+            """
+            self.browser.page().runJavaScript(script)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
