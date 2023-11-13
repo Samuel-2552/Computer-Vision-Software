@@ -22,7 +22,7 @@ class FlaskThread(QThread):
         def Try():
             return render_template('try.html')
             
-        self.flask_app.run(host='127.0.0.1', port=5000, threaded=True, request_handler=WSGIRequestHandler)
+        self.flask_app.run(host='127.0.0.1', port=54321, threaded=True, request_handler=WSGIRequestHandler)
 
 class Browser(QMainWindow):
     def __init__(self):
@@ -36,7 +36,7 @@ class Browser(QMainWindow):
         self.flask_thread.start()
 
         # Set the URL to the Flask app
-        self.browser.setUrl(QUrl("http://127.0.0.1:5000"))
+        self.browser.setUrl(QUrl("http://127.0.0.1:54321"))
 
         # Connect the close event of the main window to the stop_flask method
         self.closing.connect(self.stop_flask)
