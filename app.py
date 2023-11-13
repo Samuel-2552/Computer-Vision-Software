@@ -3,7 +3,7 @@ import os
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtWebEngineWidgets import *
-from PyQt5.QtGui import QContextMenuEvent
+from PyQt5.QtGui import QIcon  # Import QIcon for adding an icon
 from flask import Flask, render_template
 from werkzeug.serving import WSGIRequestHandler
 import signal
@@ -21,12 +21,23 @@ class FlaskThread(QThread):
         @self.flask_app.route("/try")
         def Try():
             return render_template('try.html')
+        
+        @self.flask_app.route("/new_project")
+        def new_project():
+            return render_template('new_project.html')
+        
+        @self.flask_app.route("/existing_project")
+        def existing_project():
+            return render_template('existing_project.html')
             
         self.flask_app.run(host='127.0.0.1', port=54321, threaded=True, request_handler=WSGIRequestHandler)
 
 class Browser(QMainWindow):
     def __init__(self):
         super(Browser, self).__init__()
+
+        # Set the application icon
+        self.setWindowIcon(QIcon('static\img\logo.png'))  # Replace 'path_to_your_icon.png' with the actual path to your icon
 
         self.browser = QWebEngineView()
         self.setCentralWidget(self.browser)
@@ -44,8 +55,40 @@ class Browser(QMainWindow):
         # Connect the loadFinished signal to inject JavaScript after the page is loaded
         self.browser.loadFinished.connect(self.inject_disable_context_menu)
 
+        # Create a menu bar
+        menubar = self.menuBar()
+        
+        # Create a "File" menu
+        fileMenu = menubar.addMenu('File')
+
+         # Add an "New Project" action to the "File" menu
+        newProjectAction = QAction(QIcon('static/img/new.png'), 'New Project', self)
+        newProjectAction.triggered.connect(self.open_new_project)
+        fileMenu.addAction(newProjectAction)
+
+        # Add an "Existing Project" action to the "File" menu
+        existingProjectAction = QAction(QIcon('static/img/exist.png'), 'Existing Project', self)
+        existingProjectAction.triggered.connect(self.open_existing_project)
+        fileMenu.addAction(existingProjectAction)
+
+        # Add a separator
+        fileMenu.addSeparator()
+        
+        # Add an "Exit" action to the "File" menu
+        exitAction = QAction(QIcon('static/img/exit.png'), 'Exit', self)
+        exitAction.triggered.connect(self.close)
+        fileMenu.addAction(exitAction)
+
     # Define a custom signal for closing the Flask app
     closing = pyqtSignal()
+
+    def open_new_project(self):
+        # Redirect to the Flask route for new project
+        self.browser.setUrl(QUrl("http://127.0.0.1:54321/new_project"))
+
+    def open_existing_project(self):
+        # Redirect to the Flask route for existing project
+        self.browser.setUrl(QUrl("http://127.0.0.1:54321/existing_project"))
 
     def closeEvent(self, event):
         # Emit the closing signal when the main window is closed
@@ -71,7 +114,7 @@ class Browser(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    QApplication.setApplicationName("Flask Browser")
+    QApplication.setApplicationName("Industrial Computer Vision Software")
     window = Browser()
     window.showMaximized()
     sys.exit(app.exec_())
