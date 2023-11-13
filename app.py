@@ -4,21 +4,24 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtWebEngineWidgets import *
 from PyQt5.QtGui import QContextMenuEvent
-from flask import Flask
+from flask import Flask, render_template
 from werkzeug.serving import WSGIRequestHandler
 import signal
-
-app = Flask(__name__)
-
-@app.route("/")
-def hello():
-    return "Hello from Flask!"
 
 class FlaskThread(QThread):
     def run(self):
         # Create Flask app and set the request handler to WSGIRequestHandler
         self.flask_app = Flask(__name__)
-        self.flask_app.route("/")(lambda: "Hello from Flask!")
+        
+        # Change the route to serve index.html
+        @self.flask_app.route("/")
+        def index():
+            return render_template('index.html')  # Make sure to import send_file from flask
+        
+        @self.flask_app.route("/try")
+        def Try():
+            return render_template('try.html')
+            
         self.flask_app.run(host='127.0.0.1', port=5000, threaded=True, request_handler=WSGIRequestHandler)
 
 class Browser(QMainWindow):
