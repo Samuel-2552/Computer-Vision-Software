@@ -7,7 +7,42 @@
     <title>Industrial CV Software</title>
 </head>
 <body>
-    <center><h1>Trial CV Software</h1></center>
-    <center><h3>New Project Details:</h3></center>
+    <center><h1>New Project Details:</h1></center>
+    <form action="/create" method="post">
+        <div class="container">
+            <label for="objectDetection">
+                <div class="label">
+                    <h2>Object Detection</h2>
+                </div>
+            </label>
+            <input type="radio" class="options" name="options" id="objectDetection" value="Object Detection" hidden>
+            <label for="classification">
+                <div class="label">
+                    <h2>Classfication</h2>
+                </div>
+            </label>
+            <input type="radio" class="options" name="options" id="classification" value="Classification" hidden>
+        </div>
+        <div class="container">
+            <input type="text" class="projectName" placeholder="Enter the project name..."/>
+            <button type="submit">Create Project</button>
+        </div>
+    </form>
+    <script>
+        // Add a click event listener to the labels
+        document.querySelectorAll('label').forEach(function(label) {
+            label.addEventListener('click', function() {
+                // Remove the 'selected' class from all divs
+                document.querySelectorAll('.label').forEach(function(div) {
+                    div.classList.remove('selected');
+                });
+
+                // Add the 'selected' class to the clicked div
+                label.querySelector('.label').classList.add('selected');
+            });
+        });
+
+
+    </script>
 </body>
 </html>
