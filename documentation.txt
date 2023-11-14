@@ -12,4 +12,5 @@ pip install pyqt5
 
 pip install pyqtwebengine
 
+pip install Flask-Mail
 
