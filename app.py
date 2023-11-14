@@ -57,7 +57,7 @@ class Browser(QMainWindow):
         self.closing.connect(self.stop_flask)
 
         # Connect the loadFinished signal to inject JavaScript after the page is loaded
-        self.browser.loadFinished.connect(self.inject_disable_context_menu)
+        # self.browser.loadFinished.connect(self.inject_disable_context_menu)
 
         # Create a menu bar
         menubar = self.menuBar()
@@ -65,7 +65,7 @@ class Browser(QMainWindow):
         # Create a "File" menu
         fileMenu = menubar.addMenu('File')
 
-         # Add an "New Project" action to the "File" menu
+        # Add an "New Project" action to the "File" menu
         newProjectAction = QAction(QIcon('static/img/new.png'), 'New Project', self)
         newProjectAction.triggered.connect(self.open_new_project)
         fileMenu.addAction(newProjectAction)
