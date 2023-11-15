@@ -4,14 +4,108 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtWebEngineWidgets import *
 from PyQt5.QtGui import QIcon  # Import QIcon for adding an icon
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect
 from werkzeug.serving import WSGIRequestHandler
 import signal
+import sqlite3
+from cryptography.fernet import Fernet
+from flask_mail import Mail, Message
+import uuid
+
+def initial_setup():
+    
+    conn = sqlite3.connect('email.db')
+    cursor = conn.cursor()
+    # Create a table to store UUIDs
+    cursor.execute('''CREATE TABLE IF NOT EXISTS uuid_table (
+                        id INTEGER PRIMARY KEY,
+                        uuid_user TEXT NOT NULL,
+                        uuid_key TEXT NOT NULL
+                    )''')
+    # Generate a UUID
+    new_uuid = uuid.uuid4()
+    product_key = str(new_uuid)  # Convert UUID to string
+    new_uuid = uuid.uuid1()
+    user_id = str(new_uuid)
+
+    # Insert the UUID into the database
+    cursor.execute('''INSERT INTO uuid_table (uuid_user, uuid_key) VALUES (?,?)''', (user_id, product_key,))
+
+    # Commit the changes and close the connection
+    conn.commit()
+    conn.close()
+
+
+    
+
+    return user_id, product_key
+
+    
+
+
+def decrypt_message(encrypted_message, key):
+    fernet = Fernet(key)
+    decrypted_message = fernet.decrypt(encrypted_message).decode()
+    return decrypted_message
+
+def mail_config():
+    # Create or connect to SQLite database
+    conn = sqlite3.connect('email.db')
+    cursor = conn.cursor()
+
+    # Retrieve encrypted credentials from the database
+    cursor.execute("SELECT username, password, key FROM email WHERE id = 1")
+    result = cursor.fetchone()
+    stored_username, stored_password, key = result
+    
+    # Decrypt retrieved credentials
+    decrypted_username = decrypt_message(stored_username, key)
+    decrypted_password = decrypt_message(stored_password, key)
+    conn.close()
+        
+    return decrypted_username, decrypted_password
+
+    
+
 
 class FlaskThread(QThread):
     def run(self):
         # Create Flask app and set the request handler to WSGIRequestHandler
         self.flask_app = Flask(__name__)
+
+
+        # Configure mail settings for Gmail
+        
+        self.flask_app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+        self.flask_app.config['MAIL_PORT'] = 587
+        self.flask_app.config['MAIL_USE_TLS'] = True
+        self.flask_app.config['MAIL_USE_SSL'] = False
+
+        self.flask_app.config['MAIL_USERNAME'], self.flask_app.config['MAIL_PASSWORD'] = mail_config()
+
+        mail = Mail(self.flask_app)
+
+        @self.flask_app.route('/send_email')
+        def send_mail():
+            try:
+                recipient = '201501043@rajalakshmi.edu.in'
+                subject = 'User_Id and Product Key Generated'
+                user_id, product_key = initial_setup()
+                message_body = f'''
+                        User Id: {user_id}
+                        Product Key: {product_key}
+                    '''
+
+                msg = Message(subject, sender='industrialcomputervision@gmail.com', recipients=[recipient])
+                msg.body = message_body
+                mail.send(msg)
+                print('Email sent successfully!', 'success')
+            except Exception as e:
+                print(f'Failed to send email. Error: {str(e)}', 'error')
+            
+            return redirect('/')
+
+        
         
         # Change the route to serve index.html
         @self.flask_app.route("/")

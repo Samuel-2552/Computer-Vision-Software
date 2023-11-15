@@ -14,3 +14,9 @@ pip install pyqtwebengine
 
 pip install Flask-Mail
 
+pip install cryptography
+
+
+
+
+product key and user id generation to be take care of
