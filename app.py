@@ -4,49 +4,25 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtWebEngineWidgets import *
 from PyQt5.QtGui import QIcon  # Import QIcon for adding an icon
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, request
 from werkzeug.serving import WSGIRequestHandler
 import signal
 import sqlite3
 from cryptography.fernet import Fernet
 from flask_mail import Mail, Message
 import uuid
+import datetime
 
-def initial_setup():
-    
-    conn = sqlite3.connect('email.db')
-    cursor = conn.cursor()
-    # Create a table to store UUIDs
-    cursor.execute('''CREATE TABLE IF NOT EXISTS uuid_table (
-                        id INTEGER PRIMARY KEY,
-                        uuid_user TEXT NOT NULL,
-                        uuid_key TEXT NOT NULL
-                    )''')
-    # Generate a UUID
-    new_uuid = uuid.uuid4()
-    product_key = str(new_uuid)  # Convert UUID to string
-    new_uuid = uuid.uuid1()
-    user_id = str(new_uuid)
-
-    # Insert the UUID into the database
-    cursor.execute('''INSERT INTO uuid_table (uuid_user, uuid_key) VALUES (?,?)''', (user_id, product_key,))
-
-    # Commit the changes and close the connection
-    conn.commit()
-    conn.close()
-
-
-    
-
-    return user_id, product_key
-
-    
-
+def encrypt_message(message, key):
+    fernet = Fernet(key)
+    encrypted_message = fernet.encrypt(message.encode())
+    return encrypted_message
 
 def decrypt_message(encrypted_message, key):
     fernet = Fernet(key)
     decrypted_message = fernet.decrypt(encrypted_message).decode()
     return decrypted_message
+
 
 def mail_config():
     # Create or connect to SQLite database
@@ -54,9 +30,9 @@ def mail_config():
     cursor = conn.cursor()
 
     # Retrieve encrypted credentials from the database
-    cursor.execute("SELECT username, password, key FROM email WHERE id = 1")
+    cursor.execute("SELECT username, password, key, initial FROM email WHERE id = 1")
     result = cursor.fetchone()
-    stored_username, stored_password, key = result
+    stored_username, stored_password, key, intial_val = result
     
     # Decrypt retrieved credentials
     decrypted_username = decrypt_message(stored_username, key)
@@ -84,25 +60,81 @@ class FlaskThread(QThread):
         self.flask_app.config['MAIL_USERNAME'], self.flask_app.config['MAIL_PASSWORD'] = mail_config()
 
         mail = Mail(self.flask_app)
+        
+        @self.flask_app.route('/initial', methods=['POST'])
+        def initial():
+            if request.method == 'POST':
+                name = request.form['name']
+                email = request.form['email']
+                company = request.form['company']
+                designation = request.form['designation']
+                phone = request.form['phone']
 
-        @self.flask_app.route('/send_email')
-        def send_mail():
-            try:
-                recipient = '201501043@rajalakshmi.edu.in'
-                subject = 'User_Id and Product Key Generated'
-                user_id, product_key = initial_setup()
-                message_body = f'''
-                        User Id: {user_id}
-                        Product Key: {product_key}
-                    '''
+                new_uuid = uuid.uuid4()
+                product_key = str(new_uuid)  # Convert UUID to string
+                conn = sqlite3.connect('email.db')
+                cursor = conn.cursor()
 
-                msg = Message(subject, sender='industrialcomputervision@gmail.com', recipients=[recipient])
-                msg.body = message_body
-                mail.send(msg)
-                print('Email sent successfully!', 'success')
-            except Exception as e:
-                print(f'Failed to send email. Error: {str(e)}', 'error')
-            
+                # Retrieve encrypted credentials from the database
+                cursor.execute("SELECT key FROM email WHERE id = 1")
+                key = cursor.fetchone()[0]
+                conn.close()
+                encrypted_product_key = encrypt_message(product_key, key)
+                new_uuid = uuid.uuid1()
+                user_id = str(new_uuid)
+
+                # Get the current date and time
+                current_time = str(datetime.datetime.now())
+
+                with sqlite3.connect('email.db') as conn:
+                    cursor = conn.cursor()
+                    cursor.execute('''CREATE TABLE IF NOT EXISTS User (
+                                        id INTEGER PRIMARY KEY,
+                                        name TEXT NOT NULL,
+                                        email TEXT NOT NULL,
+                                        company TEXT NOT NULL,
+                                        designation TEXT NOT NULL,
+                                        phone INTEGER NOT NULL,
+                                        uuid_user TEXT NOT NULL,
+                                        uuid_key TEXT NOT NULL,
+                                        account_created TEXT NOT NULL
+                                    )''')
+
+                    cursor.execute("INSERT INTO User (name, email, company, designation, phone, uuid_user, uuid_key, account_created) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                                    (name, email, company, designation, phone, user_id, encrypted_product_key, current_time,))
+                    conn.commit()
+
+                # Update the 'email' table
+                with sqlite3.connect('email.db') as conn:
+                    cursor = conn.cursor()
+                    cursor.execute('''UPDATE email
+                                    SET initial = 1
+                                    WHERE id = 1
+                                ''')
+                    conn.commit()
+
+
+                try:
+                    recipient = 'industrialcomputervision@gmail.com'
+                    subject = f'User Details: {user_id}'
+                    message_body = f'''
+                            Name: {name}
+                            Email id: {email}
+                            Company name: {company}
+                            Designation: {designation}
+                            Phone No: {phone}
+                            User Id: {user_id}
+                            Product Key: {product_key}
+                            Created On: {current_time}
+                        '''
+
+                    msg = Message(subject, sender='techurai2023@gmail.com', recipients=[recipient])
+                    msg.body = message_body
+                    mail.send(msg)
+                    print('Email sent successfully!', 'success')
+                except Exception as e:
+                    print(f'Failed to send email. Error: {str(e)}', 'error')
+                
             return redirect('/')
 
         
@@ -110,7 +142,18 @@ class FlaskThread(QThread):
         # Change the route to serve index.html
         @self.flask_app.route("/")
         def index():
-            return render_template('index.html')  # Make sure to import send_file from flask
+            # Establish connection to the database
+            conn = sqlite3.connect('email.db')
+            cursor = conn.cursor()
+            cursor.execute('''SELECT initial
+                            FROM email
+                            WHERE id = 1;
+                            ''')
+            result = cursor.fetchone()      
+            conn.close()       
+
+
+            return render_template('index.html', result=result[0])  # Make sure to import send_file from flask
         
         @self.flask_app.route("/try")
         def Try():
@@ -151,7 +194,7 @@ class Browser(QMainWindow):
         self.closing.connect(self.stop_flask)
 
         # Connect the loadFinished signal to inject JavaScript after the page is loaded
-        # self.browser.loadFinished.connect(self.inject_disable_context_menu)
+        self.browser.loadFinished.connect(self.inject_disable_context_menu)
 
         # Create a menu bar
         menubar = self.menuBar()
@@ -179,10 +222,14 @@ class Browser(QMainWindow):
 
 
         # Create a "Activate License" menu
-        activate = menubar.addMenu('Activate License')
+        activate = menubar.addMenu('License')
 
         productKey = QAction(QIcon('static/img/key.png'), 'Product Key', self)
         productKey.triggered.connect(self.product_key)
+        activate.addAction(productKey)
+
+        productKey = QAction(QIcon('static/img/price.png'), 'Pricing and Plans', self)
+        productKey.triggered.connect(self.pricing)
         activate.addAction(productKey)
 
     # Define a custom signal for closing the Flask app
@@ -199,6 +246,11 @@ class Browser(QMainWindow):
     def product_key(self):
         # Redirect to the Flask route for product key
         self.browser.setUrl(QUrl("http://127.0.0.1:54321/productKey"))
+
+    
+    def pricing(self):
+        # Redirect to the Flask route for product key
+        self.browser.setUrl(QUrl("http://127.0.0.1:54321/pricing"))
 
     def closeEvent(self, event):
         # Emit the closing signal when the main window is closed

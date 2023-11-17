@@ -214,11 +214,9 @@ class MainWindow(QMainWindow, WindowMixin):
         open_dir = action(get_str('openDir'), self.open_dir_dialog,
                           'Ctrl+u', 'open', get_str('openDir'))
 
-        change_save_dir = action(get_str('changeSaveDir'), self.change_save_dir_dialog,
-                                 'Ctrl+r', 'open', get_str('changeSavedAnnotationDir'))
+        
 
-        open_annotation = action(get_str('openAnnotation'), self.open_annotation_dialog,
-                                 'Ctrl+Shift+O', 'open', get_str('openAnnotationDetail'))
+
         copy_prev_bounding = action(get_str('copyPrevBounding'), self.copy_previous_bounding_boxes, 'Ctrl+v', 'copy', get_str('copyPrevBounding'))
 
         open_next_image = action(get_str('nextImg'), self.open_next_image,
@@ -418,7 +416,7 @@ class MainWindow(QMainWindow, WindowMixin):
         self.display_label_option.triggered.connect(self.toggle_paint_labels_option)
 
         add_actions(self.menus.file,
-                    (open, open_dir, change_save_dir, open_annotation, copy_prev_bounding, self.menus.recentFiles, save, save_format, save_as, close, reset_all, delete_image, quit))
+                    (open, open_dir, copy_prev_bounding, self.menus.recentFiles, save, save_format, save_as, close, reset_all, delete_image, quit))
         # add_actions(self.menus.help, (help_default, show_info, show_shortcut))
         add_actions(self.menus.view, (
             self.auto_saving,
@@ -440,12 +438,12 @@ class MainWindow(QMainWindow, WindowMixin):
 
         self.tools = self.toolbar('Tools')
         self.actions.beginner = (
-            open, open_dir, change_save_dir, open_next_image, open_prev_image, verify, save, save_format, None, create, copy, delete, None,
+            open, open_dir, open_next_image, open_prev_image, verify, save, save_format, None, create, copy, delete, None,
             zoom_in, zoom, zoom_out, fit_window, fit_width, None,
             light_brighten, light, light_darken, light_org)
 
         self.actions.advanced = (
-            open, open_dir, change_save_dir, open_next_image, open_prev_image, save, save_format, None,
+            open, open_dir, open_next_image, open_prev_image, save, save_format, None,
             create_mode, edit_mode, None,
             hide_all, show_all)
 
@@ -1301,34 +1299,7 @@ class MainWindow(QMainWindow, WindowMixin):
 
         self.statusBar().showMessage('%s . Annotation will be saved to %s' %
                                      ('Change saved folder', self.default_save_dir))
-        self.statusBar().show()
-
-
-    def open_annotation_dialog(self, _value=False):
-        if self.file_path is None:
-            self.statusBar().showMessage('Please select image first')
-            self.statusBar().show()
-            return
-
-        path = os.path.dirname(ustr(self.file_path))\
-            if self.file_path else '.'
-        if self.label_file_format == LabelFileFormat.PASCAL_VOC:
-            filters = "Open Annotation XML file (%s)" % ' '.join(['*.xml'])
-            filename = ustr(QFileDialog.getOpenFileName(self, '%s - Choose a xml file' % __appname__, path, filters))
-            if filename:
-                if isinstance(filename, (tuple, list)):
-                    filename = filename[0]
-            self.load_pascal_xml_by_filename(filename)
-
-        elif self.label_file_format == LabelFileFormat.CREATE_ML:
-            
-            filters = "Open Annotation JSON file (%s)" % ' '.join(['*.json'])
-            filename = ustr(QFileDialog.getOpenFileName(self, '%s - Choose a json file' % __appname__, path, filters))
-            if filename:
-                if isinstance(filename, (tuple, list)):
-                    filename = filename[0]
-
-            self.load_create_ml_json_by_filename(filename, self.file_path)         
+        self.statusBar().show()   
         
 
     def open_dir_dialog(self, _value=False, dir_path=None, silent=False):

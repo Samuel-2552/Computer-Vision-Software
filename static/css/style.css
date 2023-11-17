@@ -7,55 +7,6 @@ h1{
     font-size: 4em;
 }
 
-.project-options{
-    display: flex;
-    justify-content: space-around;
-}
-
-button{
-    font-size: 2rem;
-}
-
-.container{
-    display: flex;
-    padding: 10px;
-    gap: 10px;
-    justify-content: space-around;
-}
-
-label{
-    cursor: pointer;
-}
-
-.label{
-    width: 200px;
-    height: 200px;
-    display: grid;
-    place-items: center;
-    border: 1px solid rgb(81, 81, 81);
-    border-radius: 10px;
-}
-
-.selected{
-    box-shadow: 0 0 10px 10px rgba(0, 0, 0, 0.285);
-}
-
-container:nth-child(1){
-    flex-direction: column;
-}
-
-.projectName{
-    width: 400px;
-    height: 70px;
-    border-radius: 10px;
-    outline: none;
-    font-size: 2rem;
-}
-
-.projectName::placeholder{
-    font-size: initial;
-}
-
 footer{
     position: absolute;
     bottom: 0;

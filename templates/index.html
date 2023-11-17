@@ -3,12 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/index.css">
     <link rel="stylesheet" href="/static/css/style.css">
+    
     <title>Industrial CV Software</title>
 </head>
 <body>
     <center><h1>Industrial CV Software</h1></center>
     <!-- <center><button onclick="location.href='/try'">Click Me</button></center> -->
+    {% if result == 0 %}
+    <div class="init">
+    <form id="myForm" action="/initial" method="post">
+        <label for="name">Name:</label>
+        <input required type="text" id="name" name="name">
+        <label for="email">Email:</label>
+        <input required type="email" id="email" name="email">
+        <label for="company">Company Name:</label>
+        <input required type="text" id="company" name="company">
+        <label for="designation">Designation:</label>
+        <input required type="text" id="designation" name="designation">
+        <label for="phone">Phone Number:</label>
+        <input required type="tel" id="phone" name="phone">
+        <input type="submit" value="Submit" id="submitButton">
+      </form>
+    </div>
+
+    <div class="loading-screen" id="loadingScreen">
+        <p id="loadingMessage">Submitting...</p>
+        <div class="loading-dots"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+      {% else %}
 
     <div class="project-options">
         <button onclick="location.href='/new_project'">New Project</button>
@@ -17,8 +43,11 @@
 
     <footer>
         <p>
-            This application is licensed and have only 3 months of free trial
+            This application is not licensed and have only 3 months of free trial
         </p>
     </footer>
+    {% endif %}
+
+    
 </body>
 </html>
