@@ -18,10 +18,8 @@ pip install cryptography
 
 pip install lxml
 
-pip install psutil
-
-pip install netifaces
-
 pip install wmi
+
+pip install requests
 
 product key and user id generation to be take care of
