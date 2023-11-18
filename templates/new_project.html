@@ -1,48 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/new_project.css">
     <title>Industrial CV Software</title>
 </head>
+
 <body>
-    <center><h1>New Project Details:</h1></center>
-    <form action="/create" method="post">
-        <div class="container">
-            <label for="objectDetection">
-                <div class="label">
-                    <h2>Object Detection</h2>
-                </div>
-            </label>
-            <input type="radio" class="options" name="options" id="objectDetection" value="Object Detection" hidden>
-            <label for="classification">
-                <div class="label">
-                    <h2>Classfication</h2>
-                </div>
-            </label>
-            <input type="radio" class="options" name="options" id="classification" value="Classification" hidden>
+    
+    <h1 class="center">New Project Details:</h1>
+    <div class="init">
+        <form id="myForm" action="/project" method="get">
+            <label for="projectName"> Project Name:</label>
+            <input required type="text" id="projectName" name="projectName">
+            
+            <label for="projectLocation">Project Location:</label>
+            <input required type="text" id="projectLocation" class="projectLocation" name="projectLocation"
+                accept="*/*">
+
+            <label for="projectType">Project Type:</label>
+            <select id="projectType" name="projectType">
+                <option value="ObjectDetection" selected>Object Detection</option>
+            </select>
+            <div>
+                <br>
+            </div>
+            <input type="submit" value="Create" id="submitButton">
+        </form>
+    </div>
+    <h1 class="center">Plans and Pricing</h1>
+    <div class="flex-container">
+        <div class="card">
+            <h3 class="center">Free Plan</h3>
         </div>
-        <div class="container">
-            <input type="text" class="projectName" placeholder="Enter the project name..."/>
-            <button type="submit">Create Project</button>
+        <div class="card">
+            <h3 class="center">Monthly Plan</h3>
         </div>
-    </form>
-    <script>
-        // Add a click event listener to the labels
-        document.querySelectorAll('label').forEach(function(label) {
-            label.addEventListener('click', function() {
-                // Remove the 'selected' class from all divs
-                document.querySelectorAll('.label').forEach(function(div) {
-                    div.classList.remove('selected');
-                });
-
-                // Add the 'selected' class to the clicked div
-                label.querySelector('.label').classList.add('selected');
-            });
-        });
-
-
-    </script>
+        <div class="card">
+            <h3 class="center">Yearly Plan</h3>
+        </div>
+    </div>
 </body>
+
 </html>

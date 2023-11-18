@@ -1,0 +1,78 @@
+.dialog-box {
+    width: 300px;
+    padding: 20px;
+    background-color: #d2d2d2;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+    margin: 50px auto;
+}
+
+input[type="text"] {
+    width: calc(100% - 12px);
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #000000;
+    border-radius: 3px;
+    background-color: #ffffff;
+    color: #000000;
+    box-sizing: border-box;
+}
+
+input[type='button'], input[type='submit'] {
+    background-color: #ff9933;
+    color: #ffffff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    position: relative;
+}
+
+input[type="button"]:hover, input[type='submit']:hover {
+    background-color: #ff8000;
+}
+
+.title-bar {
+    padding: 5px;
+    text-align: center;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.close-button {
+    float: right;
+    cursor: pointer;
+}
+
+.content {
+    margin-top: 10px;
+}
+
+p.descriptive {
+    color: #888888;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.init {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.init input[type='submit']{
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+form {
+    width: 300px;
+    border-radius: 10px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #000000;
+}
+

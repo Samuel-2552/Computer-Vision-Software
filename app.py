@@ -61,7 +61,7 @@ class FlaskThread(QThread):
 
         mail = Mail(self.flask_app)
         
-        @self.flask_app.route('/initial', methods=['POST'])
+        @self.flask_app.route('/home', methods=['POST'])
         def initial():
             if request.method == 'POST':
                 name = request.form['name']
@@ -170,6 +170,10 @@ class FlaskThread(QThread):
         @self.flask_app.route("/productKey")
         def productKey():
             return render_template('productKey.html')
+        
+        @self.flask_app.route("/project")
+        def activation():
+            return render_template('project.html')
             
         self.flask_app.run(host='127.0.0.1', port=54321, threaded=True, request_handler=WSGIRequestHandler)
 

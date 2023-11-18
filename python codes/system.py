@@ -1,6 +1,6 @@
 import platform
 import psutil
-import netifaces
+# import netifaces
 import socket
 import wmi
 
@@ -66,25 +66,25 @@ for category, details in system_details.items():
         print(details)
 
 
-def get_mac_addresses():
-    mac_addresses = {}
-    interfaces = netifaces.interfaces()
+# def get_mac_addresses():
+#     mac_addresses = {}
+#     interfaces = netifaces.interfaces()
 
-    for interface in interfaces:
-        try:
-            addresses = netifaces.ifaddresses(interface)[netifaces.AF_LINK]
-            mac_addr = addresses[0]['addr']
-            mac_addresses[interface] = mac_addr
-        except KeyError:
-            continue
+#     for interface in interfaces:
+#         try:
+#             addresses = netifaces.ifaddresses(interface)[netifaces.AF_LINK]
+#             mac_addr = addresses[0]['addr']
+#             mac_addresses[interface] = mac_addr
+#         except KeyError:
+#             continue
 
-    return mac_addresses
+#     return mac_addresses
 
 # Get and print MAC addresses
-mac_addresses = get_mac_addresses()
-print("\nMAC Addresses:")
-for interface, mac_addr in mac_addresses.items():
-    print(f"{interface}: {mac_addr}")
+# mac_addresses = get_mac_addresses()
+# print("\nMAC Addresses:")
+# for interface, mac_addr in mac_addresses.items():
+#     print(f"{interface}: {mac_addr}")
 
 def get_system_identifiers():
     system_info = {}

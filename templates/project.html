@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vintage Dialog Box</title>
+    <link rel="stylesheet" href="/static/css/project.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+    <div>
+        <h1 class="center">Activate your License</h1>
+        <div class="dialog-box">
+            <div class="title-bar">
+                <input type="text" placeholder="Enter the transation id"/>
+                <div class="content">
+                    <input type="button" value="Submit"/>
+                    <p class="descriptive">
+                        Refer plans and pricing.<br><br>
+                        Complete the payment and enter the transaction id.<br>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <h1 class="center">New Project Details:</h1>
+        <div class="init">
+            <form id="myForm" action="/project" method="get">
+                <label for="videoLocation"> Video Location:</label>
+                <input required type="text" id="videoLocation" name="videoLocation">
+                <h5 class="center">or</h5>
+                <label for="imageLocation"> Image Location:</label>
+                <input required type="text" id="ImageLocation" name="Image Location">
+                <div>
+                    <br>
+                </div>
+                <input type="submit" value="Create" id="submitButton">
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>
