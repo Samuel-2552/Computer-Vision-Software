@@ -145,8 +145,6 @@ class FlaskThread(QThread):
         # Change the route to serve index.html
         @self.flask_app.route("/")
         def index():
-               
-
             user_data = {'sys_id': get_system_id()}
 
             web_server_url = 'http://icvs.pythonanywhere.com/check-sys-id'  # Replace with your web server URL

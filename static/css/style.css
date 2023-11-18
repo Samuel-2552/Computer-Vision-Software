@@ -36,6 +36,48 @@ footer p {
     flex-basis: 100%;
 }
 
-.center{
+.center {
     text-align: center;
+}
+
+.descriptive {
+    color: #000000;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #000000;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"] {
+    width: calc(100% - 12px);
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #000000;
+    border-radius: 3px;
+    background-color: #ffffff;
+    color: #000000;
+    box-sizing: border-box;
+}
+
+input[type='button'],
+input[type='submit'] {
+    background-color: #ff9933;
+    color: #ffffff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    position: relative;
+    width: 150px;
+    font-size: 1.2rem;
+}
+
+input[type="button"]:hover,
+input[type='submit']:hover {
+    background-color: #ff8000;
 }

@@ -23,37 +23,6 @@ label {
     /* Label color */
 }
 
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-input[type="submit"] {
-    width: calc(100% - 12px);
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #000000;
-    /* Input field border color */
-    border-radius: 3px;
-    background-color: #ffffff;
-    /* Input field background color */
-    color: #000000;
-    /* Input field text color */
-    box-sizing: border-box;
-}
-
-input[type="submit"] {
-    background-color: #ff9933;
-    /* Submit button background color */
-    color: #ffffff;
-    /* Submit button text color */
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-input[type="submit"]:hover {
-    background-color: #ff8000;
-}
-
 .card{
     flex-basis: 30%;
     background-color: #ccc;
