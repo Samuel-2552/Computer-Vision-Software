@@ -7,19 +7,31 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/new_project.css">
     <title>Industrial CV Software</title>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body>
-    
+
     <h1 class="center">New Project Details:</h1>
     <div class="init">
         <form id="myForm" action="/project" method="get">
             <label for="projectName"> Project Name:</label>
             <input required type="text" id="projectName" name="projectName">
-            
+
             <label for="projectLocation">Project Location:</label>
-            <input required type="text" id="projectLocation" class="projectLocation" name="projectLocation"
-                accept="*/*">
+            <button id="selectDirectoryBtn">Select Directory</button>
+
+            <script>
+                $(document).ready(function () {
+                    $('#selectDirectoryBtn').on('click', function () {
+                        // When the button is clicked, send an AJAX request to the server
+                        $.get('/select_directory', function (response) {
+                            alert(response); // Show the response message (for testing)
+                        });
+                    });
+                });
+            </script>
 
             <label for="projectType">Project Type:</label>
             <select id="projectType" name="projectType">

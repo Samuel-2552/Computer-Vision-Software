@@ -176,9 +176,16 @@ class FlaskThread(QThread):
 
             return render_template('index.html', result=result[0])  # Make sure to import send_file from flask
         
-        @self.flask_app.route("/try")
-        def Try():
-            return render_template('try.html')
+        @self.flask_app.route("/select_directory", methods=['GET'])
+        def select_directory():
+            directory = QFileDialog.getExistingDirectory(None, "Select Project Directory", options=QFileDialog.ShowDirsOnly)
+            
+            if directory:
+                # store_directory_in_database(directory)
+                print("Working", directory)
+                return "Directory selected and stored in database."
+            else:
+                return "No directory selected."
         
         @self.flask_app.route("/new_project")
         def new_project():
@@ -237,6 +244,13 @@ class Browser(QMainWindow):
         existingProjectAction.triggered.connect(self.open_existing_project)
         fileMenu.addAction(existingProjectAction)
 
+        # Add a "Select Project Directory" action to the "File" menu
+        selectProjectDirAction = QAction('Select Project Directory', self)
+        selectProjectDirAction.triggered.connect(self.select_project_directory)
+        fileMenu.addAction(selectProjectDirAction)
+        # Add a separator
+        fileMenu.addSeparator()
+
         # Add a separator
         fileMenu.addSeparator()
         
@@ -244,6 +258,9 @@ class Browser(QMainWindow):
         exitAction = QAction(QIcon('static/img/exit.png'), 'Exit', self)
         exitAction.triggered.connect(self.close)
         fileMenu.addAction(exitAction)
+        
+        
+
 
 
         # Create a "Activate License" menu
@@ -298,6 +315,25 @@ class Browser(QMainWindow):
             });
             """
             self.browser.page().runJavaScript(script)
+
+    def select_project_directory(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.ShowDirsOnly
+        directory = QFileDialog.getExistingDirectory(self, "Select Project Directory", options=options)
+        
+        if directory:
+            self.store_directory_in_database(directory)
+            QMessageBox.information(self, "Project Directory Selected", f"Directory selected: {directory}")
+            print(directory)
+
+    def store_directory_in_database(self, directory):
+        try:
+            # self.cursor.execute("INSERT INTO ProjectDirectories (directory_path) VALUES (?)", (directory,))
+            # self.conn.commit()
+            print("hi")
+        except sqlite3.Error as e:
+            print(f"Error occurred: {e}")
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
