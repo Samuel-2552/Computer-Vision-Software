@@ -12,6 +12,8 @@ from cryptography.fernet import Fernet
 from flask_mail import Mail, Message
 import uuid
 import datetime
+import wmi
+import requests
 
 def encrypt_message(message, key):
     fernet = Fernet(key)
@@ -22,6 +24,21 @@ def decrypt_message(encrypted_message, key):
     fernet = Fernet(key)
     decrypted_message = fernet.decrypt(encrypted_message).decode()
     return decrypted_message
+
+def get_system_id():
+    try:
+        # Connect to Windows Management Instrumentation (WMI)
+        c = wmi.WMI()
+        # System UUID (Universally Unique Identifier)
+        for system in c.Win32_ComputerSystemProduct():
+            system_info = system.UUID
+
+    except Exception as e:
+        print(f"Error: {e}")
+        system_info = "0"
+
+    return system_info
+
 
 
 def mail_config():
@@ -70,70 +87,56 @@ class FlaskThread(QThread):
                 designation = request.form['designation']
                 phone = request.form['phone']
 
-                new_uuid = uuid.uuid4()
-                product_key = str(new_uuid)  # Convert UUID to string
-                conn = sqlite3.connect('email.db')
-                cursor = conn.cursor()
-
-                # Retrieve encrypted credentials from the database
-                cursor.execute("SELECT key FROM email WHERE id = 1")
-                key = cursor.fetchone()[0]
-                conn.close()
-                encrypted_product_key = encrypt_message(product_key, key)
-                new_uuid = uuid.uuid1()
-                user_id = str(new_uuid)
-
                 # Get the current date and time
                 current_time = str(datetime.datetime.now())
 
-                with sqlite3.connect('email.db') as conn:
-                    cursor = conn.cursor()
-                    cursor.execute('''CREATE TABLE IF NOT EXISTS User (
-                                        id INTEGER PRIMARY KEY,
-                                        name TEXT NOT NULL,
-                                        email TEXT NOT NULL,
-                                        company TEXT NOT NULL,
-                                        designation TEXT NOT NULL,
-                                        phone INTEGER NOT NULL,
-                                        uuid_user TEXT NOT NULL,
-                                        uuid_key TEXT NOT NULL,
-                                        account_created TEXT NOT NULL
-                                    )''')
+                sys_id = get_system_id()
 
-                    cursor.execute("INSERT INTO User (name, email, company, designation, phone, uuid_user, uuid_key, account_created) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                                    (name, email, company, designation, phone, user_id, encrypted_product_key, current_time,))
-                    conn.commit()
+                user_data = {'sys_id': sys_id, 'name': name, 'email': email, 'company': company, 'designation': designation, 'phone': phone, 'account_created': current_time}
 
-                # Update the 'email' table
-                with sqlite3.connect('email.db') as conn:
-                    cursor = conn.cursor()
-                    cursor.execute('''UPDATE email
-                                    SET initial = 1
-                                    WHERE id = 1
-                                ''')
-                    conn.commit()
+                web_server_url = 'http://icvs.pythonanywhere.com/receive-user-data'  # Replace with your web server URL
+                response = requests.post(web_server_url, json=user_data)
+
+                # Process the response from the web server if needed
+                if response.status_code == 200:
+                    print("User data sent successfully to the web server")
+                    print(response)
+
+                    try:
+                        recipient = 'industrialcomputervision@gmail.com'
+                        subject = f'New User System Id : {sys_id}'
+                        message_body = f'''
+                                Name: {name}
+                                Email id: {email}
+                                Company name: {company}
+                                Designation: {designation}
+                                Phone No: {phone}
+                                Created On: {current_time}
+                            '''
+
+                        msg = Message(subject, sender='printease2023@gmail.com', recipients=[recipient])
+                        msg.body = message_body
+                        mail.send(msg)
+                        print('Email sent successfully!', 'success')
+                        # Update the 'email' table (to send the details as email during initial setup for back up)
+                        with sqlite3.connect('email.db') as conn:
+                            cursor = conn.cursor()
+                            cursor.execute('''UPDATE email
+                                            SET initial = 1
+                                            WHERE id = 1
+                                        ''')
+                            conn.commit()
+                    except Exception as e:
+                        print(f'Failed to send email. Error: {str(e)}', 'error')
+
+                else:
+                    print(response)
+                    print("Failed to send user data to the web server", 500)
+
+                
 
 
-                try:
-                    recipient = 'industrialcomputervision@gmail.com'
-                    subject = f'User Details: {user_id}'
-                    message_body = f'''
-                            Name: {name}
-                            Email id: {email}
-                            Company name: {company}
-                            Designation: {designation}
-                            Phone No: {phone}
-                            User Id: {user_id}
-                            Product Key: {product_key}
-                            Created On: {current_time}
-                        '''
-
-                    msg = Message(subject, sender='techurai2023@gmail.com', recipients=[recipient])
-                    msg.body = message_body
-                    mail.send(msg)
-                    print('Email sent successfully!', 'success')
-                except Exception as e:
-                    print(f'Failed to send email. Error: {str(e)}', 'error')
+                
                 
             return redirect('/')
 
@@ -142,6 +145,25 @@ class FlaskThread(QThread):
         # Change the route to serve index.html
         @self.flask_app.route("/")
         def index():
+               
+
+            user_data = {'sys_id': get_system_id()}
+
+            web_server_url = 'http://icvs.pythonanywhere.com/check-sys-id'  # Replace with your web server URL
+            response = requests.post(web_server_url, json=user_data)
+            if response.status_code == 200:
+                val=response.json().get('exists')
+                if val:
+                    # Update the 'email' table (to send the details as email during initial setup for back up)
+                    with sqlite3.connect('email.db') as conn:
+                        cursor = conn.cursor()
+                        cursor.execute('''UPDATE email
+                                        SET initial = 1
+                                        WHERE id = 1
+                                    ''')
+                        conn.commit()
+
+                    
             # Establish connection to the database
             conn = sqlite3.connect('email.db')
             cursor = conn.cursor()
@@ -150,8 +172,7 @@ class FlaskThread(QThread):
                             WHERE id = 1;
                             ''')
             result = cursor.fetchone()      
-            conn.close()       
-
+            conn.close()  
 
             return render_template('index.html', result=result[0])  # Make sure to import send_file from flask
         
