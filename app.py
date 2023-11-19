@@ -180,10 +180,10 @@ class FlaskThread(QThread):
             
             if directory:
                 # store_directory_in_database(directory)
-                print("Working", directory)
-                return "Directory selected and stored in database."
+                # print("Working", directory)
+                return f"<b>Project Directory Selected:</b> \n {directory}"
             else:
-                return "No directory selected."
+                return "No Directory selected."
         
         @self.flask_app.route("/new_project")
         def new_project():

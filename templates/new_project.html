@@ -7,7 +7,54 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/new_project.css">
     <title>Industrial CV Software</title>
-    
+    <style>
+        /* Styles for the modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            width: 300px;
+            /* Adjust width as needed */
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .modal-content p {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .modal-content button {
+            padding: 8px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .modal-content button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
@@ -22,15 +69,44 @@
             <label for="projectLocation">Project Location:</label>
             <button id="selectDirectoryBtn">Select Directory</button>
 
+            <div id="customModal" class="modal">
+                <div class="modal-content">
+                    <p id="customMessage">Default message here.</p>
+                    <button onclick="closeModal()">OK</button>
+                </div>
+            </div>
+
+
             <script>
                 $(document).ready(function () {
                     $('#selectDirectoryBtn').on('click', function () {
                         // When the button is clicked, send an AJAX request to the server
                         $.get('/select_directory', function (response) {
-                            alert(response); // Show the response message (for testing)
+                            showCustomAlert(response); // Show the response message in the custom alert box
                         });
                     });
                 });
+
+                function showCustomAlert(message) {
+                    updateCustomMessage(message);
+                    openModal();
+                }
+
+                function updateCustomMessage(message) {
+                    var messageElement = document.getElementById('customMessage');
+                    if (messageElement) {
+                        messageElement.textContent = message;
+                    }
+                }
+
+                function openModal() {
+                    document.getElementById('customModal').style.display = 'block';
+                }
+
+                function closeModal() {
+                    document.getElementById('customModal').style.display = 'none';
+                }
+
             </script>
 
             <label for="projectType">Project Type:</label>
