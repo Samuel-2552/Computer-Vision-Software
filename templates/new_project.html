@@ -60,15 +60,25 @@
 
 <body>
 
+    <!-- Add this div for the custom alert box -->
+    <div id="customAlertBox" class="custom-alert">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeAlertBox()">&times;</span>
+            <p id="alertMessage">Project Location cannot be empty.</p>
+        </div>
+    </div>
+
     <h1 class="center">New Project Details:</h1>
     <div class="init">
-        <form id="myForm" action="/project" method="get">
+        <form id="myForm" action="/project" method="get" onsubmit="return validateForm()">
             <label for="projectName"> Project Name:</label>
             <input required type="text" id="projectName" name="projectName">
 
             <label for="projectLocation">Project Location:</label>
             <input required readonly type="text" id="projectLocation" name="projectLocation" value="">
-            <button id="selectDirectoryBtn" type="button" data-locationId = "projectLocation">Browse</button>
+            <button id="selectDirectoryBtn" type="button" data-locationId="projectLocation">Browse</button>
+
+            <div><br></div>
 
             <label for="projectType">Project Type:</label>
             <select id="projectType" name="projectType">

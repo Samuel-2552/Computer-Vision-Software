@@ -194,8 +194,12 @@ class FlaskThread(QThread):
         def productKey():
             return render_template('productKey.html')
         
-        @self.flask_app.route("/project")
+        @self.flask_app.route("/project", methods=['GET', 'POST'])
         def project():
+            if request.method == 'POST':
+                project_name = request.form['projectName']
+                project_location = request.form['projectLocation']
+                project_type = request.form['projectType']
             return render_template('project.html')
             
         self.flask_app.run(host='127.0.0.1', port=54321, threaded=True, request_handler=WSGIRequestHandler)
