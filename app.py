@@ -179,11 +179,8 @@ class FlaskThread(QThread):
             directory = QFileDialog.getExistingDirectory(None, "Select Project Directory", options=QFileDialog.ShowDirsOnly)
             
             if directory:
-                # store_directory_in_database(directory)
-                # print("Working", directory)
-                return f"<b>Project Directory Selected:</b> \n {directory}"
-            else:
-                return "No Directory selected."
+                return f"{directory}"
+            return ""
         
         @self.flask_app.route("/new_project")
         def new_project():
@@ -198,7 +195,7 @@ class FlaskThread(QThread):
             return render_template('productKey.html')
         
         @self.flask_app.route("/project")
-        def activation():
+        def project():
             return render_template('project.html')
             
         self.flask_app.run(host='127.0.0.1', port=54321, threaded=True, request_handler=WSGIRequestHandler)

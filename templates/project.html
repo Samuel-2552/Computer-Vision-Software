@@ -7,6 +7,7 @@
     <title>Vintage Dialog Box</title>
     <link rel="stylesheet" href="/static/css/project.css">
     <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body>
@@ -31,10 +32,12 @@
         <div class="init">
             <form id="myForm" action="/project" method="get">
                 <label for="videoLocation"> Video Location:</label>
-                <input required type="text" id="videoLocation" name="videoLocation">
-                <h5 class="center">or</h5>
+                <input required readonly type="text" id="videoLocation" name="videoLocation">
+                <button type="button" data-locationId="videoLocation">Browse</button>
+                <p class="center descriptive">or</p>
                 <label for="imageLocation"> Image Location:</label>
-                <input required type="text" id="ImageLocation" name="Image Location">
+                <input required readonly type="text" id="imageLocation" name="imageLocation">
+                <button type="button" data-locationId="imageLocation">Browse</button>
                 <div>
                     <br>
                 </div>
@@ -42,6 +45,7 @@
             </form>
         </div>
     </div>
+    <script src="/static/js/script.js"></script>
 </body>
 
 </html>

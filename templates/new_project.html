@@ -67,47 +67,8 @@
             <input required type="text" id="projectName" name="projectName">
 
             <label for="projectLocation">Project Location:</label>
-            <button id="selectDirectoryBtn">Select Directory</button>
-
-            <div id="customModal" class="modal">
-                <div class="modal-content">
-                    <p id="customMessage">Default message here.</p>
-                    <button onclick="closeModal()">OK</button>
-                </div>
-            </div>
-
-
-            <script>
-                $(document).ready(function () {
-                    $('#selectDirectoryBtn').on('click', function () {
-                        // When the button is clicked, send an AJAX request to the server
-                        $.get('/select_directory', function (response) {
-                            showCustomAlert(response); // Show the response message in the custom alert box
-                        });
-                    });
-                });
-
-                function showCustomAlert(message) {
-                    updateCustomMessage(message);
-                    openModal();
-                }
-
-                function updateCustomMessage(message) {
-                    var messageElement = document.getElementById('customMessage');
-                    if (messageElement) {
-                        messageElement.textContent = message;
-                    }
-                }
-
-                function openModal() {
-                    document.getElementById('customModal').style.display = 'block';
-                }
-
-                function closeModal() {
-                    document.getElementById('customModal').style.display = 'none';
-                }
-
-            </script>
+            <input required readonly type="text" id="projectLocation" name="projectLocation" value="">
+            <button id="selectDirectoryBtn" type="button" data-locationId = "projectLocation">Browse</button>
 
             <label for="projectType">Project Type:</label>
             <select id="projectType" name="projectType">
@@ -131,6 +92,7 @@
             <h3 class="center">Yearly Plan</h3>
         </div>
     </div>
+    <script src="/static/js/script.js"></script>
 </body>
 
 </html>
