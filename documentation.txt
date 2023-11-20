@@ -22,4 +22,6 @@ pip install wmi
 
 pip install requests
 
+pip install opencv-python-headless
+
 product key and user id generation to be take care of
