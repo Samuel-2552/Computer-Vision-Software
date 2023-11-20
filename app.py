@@ -212,9 +212,8 @@ class FlaskThread(QThread):
             mimetype, _ = mimetypes.guess_type(video_path)
             if not mimetype:
                 mimetype = 'application/octet-stream'
-
-            return send_file(video_path, mimetype=mimetype)
-
+            print(mimetype)
+            return send_file(video_path, mimetype='video/mp4')
 
         @self.flask_app.route("/project", methods=['GET', 'POST'])
         def project():
