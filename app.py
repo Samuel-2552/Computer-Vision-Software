@@ -94,7 +94,7 @@ class FlaskThread(QThread):
 
                 user_data = {'sys_id': sys_id, 'name': name, 'email': email, 'company': company, 'designation': designation, 'phone': phone, 'account_created': current_time}
 
-                web_server_url = 'http://127.0.0.1:5000/receive-user-data'  # Replace with your web server URL
+                web_server_url = 'https://icvs.pythonanywhere.com//receive-user-data'  # Replace with your web server URL
                 response = requests.post(web_server_url, json=user_data)
 
                 # Process the response from the web server if needed
@@ -147,7 +147,7 @@ class FlaskThread(QThread):
         def index():
             user_data = {'sys_id': get_system_id()}
 
-            web_server_url = 'http://127.0.0.1:5000/check-sys-id'  # Replace with your web server URL
+            web_server_url = 'https://icvs.pythonanywhere.com//check-sys-id'  # Replace with your web server URL
             response = requests.post(web_server_url, json=user_data)
             if response.status_code == 200:
                 val=response.json().get('exists')
@@ -206,7 +206,7 @@ class FlaskThread(QThread):
 
                 user_data = {'sys_id': sys_id}
 
-                web_server_url = 'http://127.0.0.1:5000/check-project-count'  # Replace with your web server URL
+                web_server_url = 'https://icvs.pythonanywhere.com//check-project-count'  # Replace with your web server URL
                 response = requests.post(web_server_url, json=user_data)
                 if response.status_code == 200:
                     val=response.json().get('project_count')
@@ -225,7 +225,7 @@ class FlaskThread(QThread):
 
                     project_data = {'sys_id': sys_id, 'project_id': project_id, 'project_name': project_name, 'project_location': project_location, 'project_type': project_type, 'dataset_location': dataset_location, 'license_start': license_start, 'license_end': license_end}
 
-                    web_server_url = 'http://127.0.0.1:5000/project-data'  # Replace with your web server URL
+                    web_server_url = 'https://icvs.pythonanywhere.com//project-data'  # Replace with your web server URL
                     project_response = requests.post(web_server_url, json=project_data)
 
                     # Process the project_response from the web server if needed
