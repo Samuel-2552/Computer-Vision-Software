@@ -3,8 +3,8 @@ import os
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtWebEngineWidgets import *
-from PyQt5.QtGui import QIcon  # Import QIcon for adding an icon
-from flask import Flask, render_template, redirect, request
+from PyQt5.QtGui import QIcon 
+from flask import Flask, render_template, redirect, request, send_file
 from werkzeug.serving import WSGIRequestHandler
 import signal
 import sqlite3
@@ -14,6 +14,7 @@ import uuid
 import datetime
 import wmi
 import requests
+import mimetypes
 
 def encrypt_message(message, key):
     fernet = Fernet(key)
@@ -72,17 +73,12 @@ class FlaskThread(QThread):
     def run(self):
         # Create Flask app and set the request handler to WSGIRequestHandler
         self.flask_app = Flask(__name__)
-
-
         # Configure mail settings for Gmail
-        
         self.flask_app.config['MAIL_SERVER'] = 'smtp.gmail.com'
         self.flask_app.config['MAIL_PORT'] = 587
         self.flask_app.config['MAIL_USE_TLS'] = True
         self.flask_app.config['MAIL_USE_SSL'] = False
-
         self.flask_app.config['MAIL_USERNAME'], self.flask_app.config['MAIL_PASSWORD'] = mail_config()
-
         mail = Mail(self.flask_app)
         
         @self.flask_app.route('/home', methods=['POST'])
@@ -93,22 +89,16 @@ class FlaskThread(QThread):
                 company = request.form['company']
                 designation = request.form['designation']
                 phone = request.form['phone']
-
                 # Get the current date and time
                 current_time = str(datetime.datetime.now())
-
                 sys_id = get_system_id()
-
                 user_data = {'sys_id': sys_id, 'name': name, 'email': email, 'company': company, 'designation': designation, 'phone': phone, 'account_created': current_time}
-
                 web_server_url = 'https://icvs.pythonanywhere.com//receive-user-data'  # Replace with your web server URL
                 response = requests.post(web_server_url, json=user_data)
-
                 # Process the response from the web server if needed
                 if response.status_code == 200:
                     print("User data sent successfully to the web server")
                     print(response)
-
                     try:
                         recipient = 'industrialcomputervision@gmail.com'
                         subject = f'New User System Id : {sys_id}'
@@ -120,7 +110,6 @@ class FlaskThread(QThread):
                                 Phone No: {phone}
                                 Created On: {current_time}
                             '''
-
                         msg = Message(subject, sender='printease2023@gmail.com', recipients=[recipient])
                         msg.body = message_body
                         mail.send(msg)
@@ -135,25 +124,15 @@ class FlaskThread(QThread):
                             conn.commit()
                     except Exception as e:
                         print(f'Failed to send email. Error: {str(e)}', 'error')
-
                 else:
                     print(response)
-                    print("Failed to send user data to the web server", 500)
-
-                
-
-
-                
-                
+                    print("Failed to send user data to the web server", 500)   
             return redirect('/')
-
-        
         
         # Change the route to serve index.html
         @self.flask_app.route("/")
         def index():
             user_data = {'sys_id': get_system_id()}
-
             web_server_url = 'https://icvs.pythonanywhere.com//check-sys-id'  # Replace with your web server URL
             response = requests.post(web_server_url, json=user_data)
             if response.status_code == 200:
@@ -167,8 +146,6 @@ class FlaskThread(QThread):
                                         WHERE id = 1
                                     ''')
                         conn.commit()
-
-                    
             # Establish connection to the database
             conn = sqlite3.connect('email.db')
             cursor = conn.cursor()
@@ -178,13 +155,12 @@ class FlaskThread(QThread):
                             ''')
             result = cursor.fetchone()      
             conn.close()  
-
-            return render_template('index.html', result=result[0])  # Make sure to import send_file from flask
+            # Make sure to import send_file from flask
+            return render_template('index.html', result=result[0])
         
         @self.flask_app.route("/select_directory", methods=['GET'])
         def select_directory():
             directory = QFileDialog.getExistingDirectory(None, "Select Project Directory", options=QFileDialog.ShowDirsOnly)
-            
             if directory:
                 return f"{directory}"
             return ""
@@ -201,7 +177,6 @@ class FlaskThread(QThread):
             response = requests.post(web_server_url, json=user_data)
             if response.status_code == 200:
                 val=response.json().get('project')
-                # print(val)
             else:
                 return "Check your Internet Connection"
             return render_template('existing_project.html', project=val, datetime=datetime)
@@ -219,13 +194,26 @@ class FlaskThread(QThread):
             if response.status_code == 200:
                 val=response.json().get('project')
                 details  = val[project_id-1]
-                folder_path = details[6]  # Replace with your folder path containing video and image files
-                video_files = [file for file in get_files(folder_path) if file['type'] == 'video']
-                image_files = [file for file in get_files(folder_path) if file['type'] == 'image']
-
+                self.folder_path = details[6]  # Replace with your folder path containing video and image files
+                video_files = [file for file in get_files(self.folder_path) if file['type'] == 'video']
+                image_files = [file for file in get_files(self.folder_path) if file['type'] == 'image']
             else:
                 return "Check your Internet Connection!"
             return render_template('start.html', details=details,  videos=video_files, images=image_files)
+        
+        @self.flask_app.route('/projects/images/<string:file_name>')
+        def media_files(file_name):
+            image_path = os.path.join(self.folder_path, file_name)
+            return send_file(image_path, mimetype='image/jpeg')
+        
+        @self.flask_app.route('/projects/videos/<string:file_name>')
+        def media_files(file_name):
+            video_path = os.path.join(self.folder_path, file_name)
+            mimetype, _ = mimetypes.guess_type(video_path)
+            if not mimetype:
+                mimetype = 'application/octet-stream'
+
+            return send_file(video_path, mimetype=mimetype)
 
 
         @self.flask_app.route("/project", methods=['GET', 'POST'])
@@ -235,18 +223,14 @@ class FlaskThread(QThread):
                 project_location = request.form['projectLocation']
                 project_type = request.form['projectType']
                 dataset_location = request.form['videoLocation']
-
                 sys_id = get_system_id()
-
                 user_data = {'sys_id': sys_id}
-
                 web_server_url = 'https://icvs.pythonanywhere.com/check-project-count'  # Replace with your web server URL
                 response = requests.post(web_server_url, json=user_data)
                 if response.status_code == 200:
                     val=response.json().get('project_count')
                     val +=1
                     project_id = val
-
                     if project_id==1:
                         license_start = str(datetime.datetime.now())
                         # Calculate three months ahead
@@ -256,103 +240,71 @@ class FlaskThread(QThread):
                     else:
                         license_start = str(datetime.datetime.now())
                         license_end = license_start
-
                     project_data = {'sys_id': sys_id, 'project_id': project_id, 'project_name': project_name, 'project_location': project_location, 'project_type': project_type, 'dataset_location': dataset_location, 'license_start': license_start, 'license_end': license_end}
-
                     web_server_url = 'https://icvs.pythonanywhere.com//project-data'  # Replace with your web server URL
                     project_response = requests.post(web_server_url, json=project_data)
-
                     # Process the project_response from the web server if needed
                     if project_response.status_code == 200:
                         print("Project data sent successfully to the web server")
                         print(project_response.json())
-
-                        return "Project Created Successfully!"
-
+                        return redirect("/existing_project")
                     else:
-                        # print(project_response.json())
                         print("Failed to send Project data to the web server", 500)
                         return "Check your internet connection and Try again"
-
                 else:
-                        # print(response.json())
                         print("Failed to send Project data to the web server", 500)
-
                         return "Check your internet connection and Try again"
-                
             return render_template('project.html')
-            
         self.flask_app.run(host='127.0.0.1', port=54321, threaded=True, request_handler=WSGIRequestHandler)
 
 class Browser(QMainWindow):
     def __init__(self):
         super(Browser, self).__init__()
-
         # Set the application icon
         self.setWindowIcon(QIcon('static\img\logo.png'))  # Replace 'path_to_your_icon.png' with the actual path to your icon
-
         self.browser = QWebEngineView()
         self.setCentralWidget(self.browser)
-
         # Start Flask app in a separate thread
         self.flask_thread = FlaskThread()
         self.flask_thread.start()
-
         # Set the URL to the Flask app
         self.browser.setUrl(QUrl("http://127.0.0.1:54321"))
-
         # Connect the close event of the main window to the stop_flask method
         self.closing.connect(self.stop_flask)
-
         # Connect the loadFinished signal to inject JavaScript after the page is loaded
         self.browser.loadFinished.connect(self.inject_disable_context_menu)
-
         # Create a menu bar
         menubar = self.menuBar()
-        
         # Create a "File" menu
         fileMenu = menubar.addMenu('File')
-
         # Add an "New Project" action to the "File" menu
         newProjectAction = QAction(QIcon('static/img/new.png'), 'New Project', self)
         newProjectAction.triggered.connect(self.open_new_project)
         fileMenu.addAction(newProjectAction)
-
         # Add an "Existing Project" action to the "File" menu
         existingProjectAction = QAction(QIcon('static/img/exist.png'), 'Existing Project', self)
         existingProjectAction.triggered.connect(self.open_existing_project)
         fileMenu.addAction(existingProjectAction)
-
         # # Add a "Select Project Directory" action to the "File" menu
         # selectProjectDirAction = QAction('Select Project Directory', self)
         # selectProjectDirAction.triggered.connect(self.select_project_directory)
         # fileMenu.addAction(selectProjectDirAction)
         # # Add a separator
         # fileMenu.addSeparator()
-
         # Add a separator
         fileMenu.addSeparator()
-        
         # Add an "Exit" action to the "File" menu
         exitAction = QAction(QIcon('static/img/exit.png'), 'Exit', self)
         exitAction.triggered.connect(self.close)
         fileMenu.addAction(exitAction)
-        
-        
-
-
-
         # Create a "Activate License" menu
         activate = menubar.addMenu('License')
-
         productKey = QAction(QIcon('static/img/key.png'), 'Product Key', self)
         productKey.triggered.connect(self.product_key)
         activate.addAction(productKey)
-
         productKey = QAction(QIcon('static/img/price.png'), 'Pricing and Plans', self)
         productKey.triggered.connect(self.pricing)
         activate.addAction(productKey)
-
     # Define a custom signal for closing the Flask app
     closing = pyqtSignal()
 
@@ -368,7 +320,6 @@ class Browser(QMainWindow):
         # Redirect to the Flask route for product key
         self.browser.setUrl(QUrl("http://127.0.0.1:54321/productKey"))
 
-    
     def pricing(self):
         # Redirect to the Flask route for product key
         self.browser.setUrl(QUrl("http://127.0.0.1:54321/pricing"))
@@ -412,7 +363,6 @@ class Browser(QMainWindow):
             print("hi")
         except sqlite3.Error as e:
             print(f"Error occurred: {e}")
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
