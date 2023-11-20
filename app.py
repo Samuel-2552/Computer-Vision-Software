@@ -39,7 +39,14 @@ def get_system_id():
 
     return system_info
 
-
+def get_files(folder):
+    files = []
+    for file in os.listdir(folder):
+        if file.endswith(('.mp4', '.avi', '.mkv', '.ts')):
+            files.append({'name': file, 'type': 'video'})
+        elif file.endswith(('.png', '.jpg', '.jpeg', '.gif')):
+            files.append({'name': file, 'type': 'image'})
+    return files
 
 def mail_config():
     # Create or connect to SQLite database
@@ -188,12 +195,39 @@ class FlaskThread(QThread):
         
         @self.flask_app.route("/existing_project")
         def existing_project():
-            return render_template('existing_project.html')
+            sys_id = get_system_id()
+            user_data = {'sys_id': sys_id}
+            web_server_url = 'https://icvs.pythonanywhere.com/get-project'  # Replace with your web server URL
+            response = requests.post(web_server_url, json=user_data)
+            if response.status_code == 200:
+                val=response.json().get('project')
+                # print(val)
+            else:
+                return "Check your Internet Connection"
+            return render_template('existing_project.html', project=val, datetime=datetime)
         
         @self.flask_app.route("/productKey")
         def productKey():
             return render_template('productKey.html')
         
+        @self.flask_app.route('/projects/<int:project_id>')
+        def project_details(project_id):
+            sys_id = get_system_id()
+            user_data = {'sys_id': sys_id}
+            web_server_url = 'https://icvs.pythonanywhere.com/get-project'  # Replace with your web server URL
+            response = requests.post(web_server_url, json=user_data)
+            if response.status_code == 200:
+                val=response.json().get('project')
+                details  = val[project_id-1]
+                folder_path = details[6]  # Replace with your folder path containing video and image files
+                video_files = [file for file in get_files(folder_path) if file['type'] == 'video']
+                image_files = [file for file in get_files(folder_path) if file['type'] == 'image']
+
+            else:
+                return "Check your Internet Connection!"
+            return render_template('start.html', details=details,  videos=video_files, images=image_files)
+
+
         @self.flask_app.route("/project", methods=['GET', 'POST'])
         def project():
             if request.method == 'POST':
@@ -206,7 +240,7 @@ class FlaskThread(QThread):
 
                 user_data = {'sys_id': sys_id}
 
-                web_server_url = 'https://icvs.pythonanywhere.com//check-project-count'  # Replace with your web server URL
+                web_server_url = 'https://icvs.pythonanywhere.com/check-project-count'  # Replace with your web server URL
                 response = requests.post(web_server_url, json=user_data)
                 if response.status_code == 200:
                     val=response.json().get('project_count')

@@ -1,13 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
     <title>Industrial CV Software</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #f6f6f6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+        }
+
+        .card {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #555;
+        }
+
+        p {
+            color: #777;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            margin: 10px 0;
+            border: 1px solid #777;
+            border-radius: 4px;
+            background-color: #ddd;
+            color: #444;
+            text-decoration: none;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #ccc;
+        }
+    </style>
 </head>
+
 <body>
-    <center><h1>Trial CV Software</h1></center>
-    <center><h3>Existing Projects:</h3></center>
+    <center>
+        <h1>Industrial CV Software</h1>
+    </center>
+    <center>
+        <h3>Existing Projects:</h3>
+    </center>
+
+    <div class="container">
+        <h1>Projects</h1>
+        <div class="row">
+            {% for projects in project %}
+            <div class="col-md-4">
+                <div class="card project-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Project Name: {{ projects[3] }}</h5>
+                        <p class="card-text">ID: {{ projects[2] }}</p>
+                        <p class="card-text">Folder Location: {{ projects[4] }}</p>
+                        {% if (datetime.datetime.strptime(projects[8], "%Y-%m-%d %H:%M:%S.%f") - datetime.datetime.now()).days > 0 %}
+                        <p class="card-text">License Validity: <span style="color:green;">License Valid for {{ (datetime.datetime.strptime(projects[8], "%Y-%m-%d %H:%M:%S.%f") - datetime.datetime.now()).days }} days.</span></p>
+                        <a href="/projects/{{ projects[2] }}" class="btn btn-primary">View Project</a>
+                        {% else %}
+                        <p class="card-text">License Validity: <span style="color:red;">Expired</span></p>
+                        <a href="/activation/{{ projects[2] }}" class="btn btn-primary">Activate License</a>
+                        {% endif %}
+                        <!-- You can add more project details here -->
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 </body>
+
 </html>

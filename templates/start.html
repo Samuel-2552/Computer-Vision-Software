@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <title>Industrial CV Software</title>
+</head>
+<body>
+    <h1>{{ details[3] }}</h1>
+    
+    <h2>Videos</h2>
+    <div class="video-section">
+        {% for video in videos %}
+            <div class="card">
+                <img src="media/{{ video.name }}" alt="{{ video.name }}" width="150" height="100">
+                <p>{{ video.name }}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <h2>Images</h2>
+    <div class="image-section">
+        {% for image in images %}
+            <div class="card">
+                <img src="media/{{ image.name }}" alt="{{ image.name }}" width="150" height="100">
+                <p>{{ image.name }}</p>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
