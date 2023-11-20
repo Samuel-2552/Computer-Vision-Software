@@ -94,7 +94,7 @@ class FlaskThread(QThread):
 
                 user_data = {'sys_id': sys_id, 'name': name, 'email': email, 'company': company, 'designation': designation, 'phone': phone, 'account_created': current_time}
 
-                web_server_url = 'http://icvs.pythonanywhere.com/receive-user-data'  # Replace with your web server URL
+                web_server_url = 'http://127.0.0.1:5000/receive-user-data'  # Replace with your web server URL
                 response = requests.post(web_server_url, json=user_data)
 
                 # Process the response from the web server if needed
@@ -147,7 +147,7 @@ class FlaskThread(QThread):
         def index():
             user_data = {'sys_id': get_system_id()}
 
-            web_server_url = 'http://icvs.pythonanywhere.com/check-sys-id'  # Replace with your web server URL
+            web_server_url = 'http://127.0.0.1:5000/check-sys-id'  # Replace with your web server URL
             response = requests.post(web_server_url, json=user_data)
             if response.status_code == 200:
                 val=response.json().get('exists')
@@ -200,6 +200,52 @@ class FlaskThread(QThread):
                 project_name = request.form['projectName']
                 project_location = request.form['projectLocation']
                 project_type = request.form['projectType']
+                dataset_location = request.form['videoLocation']
+
+                sys_id = get_system_id()
+
+                user_data = {'sys_id': sys_id}
+
+                web_server_url = 'http://127.0.0.1:5000/check-project-count'  # Replace with your web server URL
+                response = requests.post(web_server_url, json=user_data)
+                if response.status_code == 200:
+                    val=response.json().get('project_count')
+                    val +=1
+                    project_id = val
+
+                    if project_id==1:
+                        license_start = str(datetime.datetime.now())
+                        # Calculate three months ahead
+                        three_months = datetime.timedelta(days=90)  # Assuming a month has 30 days for simplicity
+                        license_end = datetime.datetime.now() + three_months
+                        license_end = str(license_end)
+                    else:
+                        license_start = str(datetime.datetime.now())
+                        license_end = license_start
+
+                    project_data = {'sys_id': sys_id, 'project_id': project_id, 'project_name': project_name, 'project_location': project_location, 'project_type': project_type, 'dataset_location': dataset_location, 'license_start': license_start, 'license_end': license_end}
+
+                    web_server_url = 'http://127.0.0.1:5000/project-data'  # Replace with your web server URL
+                    project_response = requests.post(web_server_url, json=project_data)
+
+                    # Process the project_response from the web server if needed
+                    if project_response.status_code == 200:
+                        print("Project data sent successfully to the web server")
+                        print(project_response.json())
+
+                        return "Project Created Successfully!"
+
+                    else:
+                        # print(project_response.json())
+                        print("Failed to send Project data to the web server", 500)
+                        return "Check your internet connection and Try again"
+
+                else:
+                        # print(response.json())
+                        print("Failed to send Project data to the web server", 500)
+
+                        return "Check your internet connection and Try again"
+                
             return render_template('project.html')
             
         self.flask_app.run(host='127.0.0.1', port=54321, threaded=True, request_handler=WSGIRequestHandler)
@@ -243,12 +289,12 @@ class Browser(QMainWindow):
         existingProjectAction.triggered.connect(self.open_existing_project)
         fileMenu.addAction(existingProjectAction)
 
-        # Add a "Select Project Directory" action to the "File" menu
-        selectProjectDirAction = QAction('Select Project Directory', self)
-        selectProjectDirAction.triggered.connect(self.select_project_directory)
-        fileMenu.addAction(selectProjectDirAction)
-        # Add a separator
-        fileMenu.addSeparator()
+        # # Add a "Select Project Directory" action to the "File" menu
+        # selectProjectDirAction = QAction('Select Project Directory', self)
+        # selectProjectDirAction.triggered.connect(self.select_project_directory)
+        # fileMenu.addAction(selectProjectDirAction)
+        # # Add a separator
+        # fileMenu.addSeparator()
 
         # Add a separator
         fileMenu.addSeparator()

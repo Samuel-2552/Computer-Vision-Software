@@ -13,9 +13,15 @@ btn.forEach(btn => {
 
 function validateForm() {
     var projectLocation = document.getElementById("projectLocation").value;
+    var videoLocation = document.getElementById("videoLocation").value;
     if (projectLocation.trim() === "") {
         // alert("Project Location cannot be empty.");
         displayAlertBox("Project Location cannot be empty.");
+        return false; // Prevent form submission
+    }
+    if (videoLocation.trim() === "") {
+        // alert("Project Location cannot be empty.");
+        displayAlertBox("Dataset Location cannot be empty.");
         return false; // Prevent form submission
     }
     return true; // Allow form submission

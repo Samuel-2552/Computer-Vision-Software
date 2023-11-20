@@ -70,7 +70,7 @@
 
     <h1 class="center">New Project Details:</h1>
     <div class="init">
-        <form id="myForm" action="/project" method="get" onsubmit="return validateForm()">
+        <form id="myForm" action="/project" method="post" onsubmit="return validateForm()">
             <label for="projectName"> Project Name:</label>
             <input required type="text" id="projectName" name="projectName">
 
@@ -81,13 +81,20 @@
             <div><br></div>
 
             <label for="projectType">Project Type:</label>
-            <select id="projectType" name="projectType">
+            <select id="projectType" name="projectType" style="width: 250px; height: 30px;">
                 <option value="ObjectDetection" selected>Object Detection</option>
             </select>
             <div>
                 <br>
             </div>
-            <input type="submit" value="Create" id="submitButton">
+            <label for="videoLocation"> Video or Image Dataset Location:</label>
+            <input required readonly type="text" id="videoLocation" name="videoLocation">
+            <button id="selectDatasetBtn" type="button" data-locationId="videoLocation">Browse</button>
+
+            <div><br></div>
+
+            <center><input type="submit" value="Create" id="submitButton"></center>
+
         </form>
     </div>
     <h1 class="center">Plans and Pricing</h1>
