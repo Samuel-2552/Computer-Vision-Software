@@ -202,12 +202,12 @@ class FlaskThread(QThread):
             return render_template('start.html', details=details,  videos=video_files, images=image_files)
         
         @self.flask_app.route('/projects/images/<string:file_name>')
-        def media_files(file_name):
+        def image_files(file_name):
             image_path = os.path.join(self.folder_path, file_name)
             return send_file(image_path, mimetype='image/jpeg')
         
         @self.flask_app.route('/projects/videos/<string:file_name>')
-        def media_files(file_name):
+        def video_files(file_name):
             video_path = os.path.join(self.folder_path, file_name)
             mimetype, _ = mimetypes.guess_type(video_path)
             if not mimetype:
