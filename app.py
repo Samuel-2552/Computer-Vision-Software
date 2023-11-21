@@ -107,6 +107,7 @@ class FlaskThread(QThread):
     def run(self):
         # Create Flask app and set the request handler to WSGIRequestHandler
         self.flask_app = Flask(__name__)
+        self.flask_app.secret_key = 'sdfjhskjdh sjdfhkj sfh3777439'
         # Configure mail settings for Gmail
         self.flask_app.config['MAIL_SERVER'] = 'smtp.gmail.com'
         self.flask_app.config['MAIL_PORT'] = 587
@@ -262,10 +263,12 @@ class FlaskThread(QThread):
                 # project_id =  data.get('projectId')
                 project_directory = data.get('projectDirectory')
                 dataset_directory = data.get('datasetDirectory')
+                print("Project Directory:", project_directory)
                 video_folder = dataset_directory
+
                 output_folder = project_directory + "/dataset/images"
                 interval_seconds = no_frames
-
+                print("output_foldr:", output_folder)
                 # Create the output folder if it doesn't exist
                 os.makedirs(output_folder, exist_ok=True)
                 for video_filename in os.listdir(video_folder):
@@ -279,10 +282,13 @@ class FlaskThread(QThread):
         @self.flask_app.route("/get_images", methods=['GET', 'POST'])
         def get_images():
             if request.method == 'POST':
-                folder_path = request.json.get('dataset_directory') + "datatset/images"
+                path = request.json.get('projectDirectory')
+                print(path)
+                self.folder_path = path + "/dataset/images"
+                print("Project Directory:", self.folder_path)
                 session.setdefault('sent_files', [])  # Initialize 'sent_files' in session if not present
 
-                image_files = [file for file in get_files(folder_path) if file['type'] == 'image']
+                image_files = [file for file in get_files(self.folder_path) if file['type'] == 'image']
                 new_image_files = [file['name'] for file in image_files if file['name'] not in session['sent_files']]
                 session['sent_files'].extend(new_image_files)
 
