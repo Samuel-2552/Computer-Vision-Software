@@ -19,7 +19,7 @@
 
     <h2>Videos</h2>
     <form method="post" id="video_form">
-        <div class="flex-container section column">
+        <div class="flex-container section">
             <div class="controls">
                 <input type="range" id="seconds" min="1" max="50" value="5" oninput="updateSeconds()" />
                 <span id="output">5</span>
@@ -44,16 +44,12 @@
     </form>
 
     <h2>Images</h2>
-    <div class="flex-container section">
-        <!-- {% for image in images %} -->
-        <div class="card" id="image_card">
-            <!-- <img src="images/{{ image.name }}" alt="{{ image.name }}" width="150" height="100">
-            <p>{{ image.name }}</p> -->
-        </div>
-        <!-- {% endfor %} -->
+    <div class="flex-container section" id="images">
+        
     </div>
     <script>
         function getImages() {
+            const images = document.getElementById('images');
             fetch("/get_images", {
                 method: 'POST',
                 headers: {
@@ -62,14 +58,23 @@
                 body: JSON.stringify({ 'projectDirectory': "{{ details[4] }}" })
             }).then(response => response.json())
                 .then(data => {
-                    let imageCard = document.getElementById('image_card')
-                    data.image_name.forEach(
+                    images.innerHTML = "";
+                    data.image_names.forEach(
                         name => {
-                            imageCard.innerHTML = "<img src='images/{{ name }}' alt='{{ name }}' width='150' height='100><p>{{ name}}</p>"
+                            let div = document.createElement('div');
+                            let img = document.createElement('img')
+                            img.src = `images/${name}`
+                            img.alt = name;
+                            img.width = 150;
+                            img.height = 100;
+                            div.appendChild(img);
+                            let p = document.createElement('p');
+                            p.innerHTML = name;
+                            div.appendChild(p);
+                            images.appendChild(div);
                         }
                     )
                 }).catch(error => { console.log(error) });
-
         }
 
         function startFetching() {
@@ -114,7 +119,7 @@
             json.projectId = "{{ details[2] }}"
             json.projectDirectory = "{{ details[4] }}"
             json.datasetDirectory = "{{ details[6] }}"
-            startFetching();
+            // startFetching();
             fetch("/process_video", {
                 method: 'POST',
                 headers: {
@@ -129,6 +134,8 @@
                 .catch(error => {
                     console.error('Error:', error);
                 });
+
+            startFetching();
         })
     </script>
 </body>

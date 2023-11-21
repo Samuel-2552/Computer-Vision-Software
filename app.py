@@ -284,17 +284,13 @@ class FlaskThread(QThread):
             if request.method == 'POST':
                 path = request.json.get('projectDirectory')
                 print(path)
-                self.folder_path = path + "/dataset/images"
+                self.folder_path = os.path.join(path,"dataset","images")
                 print("Project Directory:", self.folder_path)
                 session.setdefault('sent_files', [])  # Initialize 'sent_files' in session if not present
-
                 image_files = [file for file in get_files(self.folder_path) if file['type'] == 'image']
                 new_image_files = [file['name'] for file in image_files if file['name'] not in session['sent_files']]
                 session['sent_files'].extend(new_image_files)
-
                 return jsonify({'image_names': new_image_files})
-
-
 
         @self.flask_app.route("/project", methods=['GET', 'POST'])
         def project():
