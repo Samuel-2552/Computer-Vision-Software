@@ -42,7 +42,40 @@
             {% endfor %}
         </div>
     </form>
+
+    <h2>Images</h2>
+    <div class="flex-container section">
+        <!-- {% for image in images %} -->
+        <div class="card" id="image_card">
+            <!-- <img src="images/{{ image.name }}" alt="{{ image.name }}" width="150" height="100">
+            <p>{{ image.name }}</p> -->
+        </div>
+        <!-- {% endfor %} -->
+    </div>
     <script>
+        function getImages() {
+            fetch("/get_images", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 'projectDirectory': "{{ details[4] }}" })
+            }).then(response => response.json())
+                .then(data => {
+                    let imageCard = document.getElementById('image_card')
+                    data.image_name.forEach(
+                        name => {
+                            imageCard.innerHTML = "<img src='images/{{ name }}' alt='{{ name }}' width='150' height='100><p>{{ name}}</p>"
+                        }
+                    )
+                }).catch(error => { console.log(error) });
+
+        }
+
+        function startFetching() {
+            setInterval(getImages, 5000)
+        }
+
         var selected_videos = [];
         const updateSeconds = () => {
             document.getElementById('output').innerHTML = document.getElementById('seconds').value
@@ -81,6 +114,7 @@
             json.projectId = "{{ details[2] }}"
             json.projectDirectory = "{{ details[4] }}"
             json.datasetDirectory = "{{ details[6] }}"
+            startFetching();
             fetch("/process_video", {
                 method: 'POST',
                 headers: {
@@ -97,16 +131,6 @@
                 });
         })
     </script>
-
-    <h2>Images</h2>
-    <div class="flex-container section">
-        {% for image in images %}
-        <div class="card">
-            <img src="images/{{ image.name }}" alt="{{ image.name }}" width="150" height="100">
-            <p>{{ image.name }}</p>
-        </div>
-        {% endfor %}
-    </div>
 </body>
 
 </html>
