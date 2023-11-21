@@ -272,6 +272,20 @@ class FlaskThread(QThread):
                         extract_frames(video_path, output_folder, interval_seconds)
 
             return "as per your requirement"
+        
+        @self.flask_app.route("/get_images", methods=['GET', 'POST'])
+        def get_images():
+            if request.method == 'POST':
+                folder_path = request.json.get('dataset_directory') + "datatset/images"
+                session.setdefault('sent_files', [])  # Initialize 'sent_files' in session if not present
+
+                image_files = [file for file in get_files(folder_path) if file['type'] == 'image']
+                new_image_files = [file['name'] for file in image_files if file['name'] not in session['sent_files']]
+                session['sent_files'].extend(new_image_files)
+
+                return jsonify({'image_names': new_image_files})
+
+
 
         @self.flask_app.route("/project", methods=['GET', 'POST'])
         def project():
