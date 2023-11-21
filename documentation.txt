@@ -24,4 +24,11 @@ pip install requests
 
 pip install opencv-python-headless
 
-product key and user id generation to be take care of
+
+
+
+if internet is not working manage to work on it.
+
+work on the transaction id to track user transaction
+
+if folder does not exist create it, other wise error occurs.

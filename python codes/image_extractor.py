@@ -36,7 +36,7 @@ def extract_frames(video_path, output_folder, interval_seconds):
     print(f"Frames extracted and saved from {video_path} to {output_folder}")
 
 if __name__ == "__main__":
-    video_folder = "C:/Users/sjose/Downloads/videos"  # Replace with the folder containing your video files
+    video_folder = "C:/Users/sjose/Downloads"  # Replace with the folder containing your video files
     output_folder = "C:/Users/sjose/Downloads/videos/output"  # Replace with your desired output folder
     interval_seconds = 5
     
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     # Iterate through all video files in the input folder
     for video_filename in os.listdir(video_folder):
         print("HI")
-        if video_filename.endswith(".ts"):
+        if video_filename.endswith(".mkv") or video_filename.endswith(".mp4") or video_filename.endswith(".ts"):
             
             video_path = os.path.join(video_folder, video_filename)
             extract_frames(video_path, output_folder, interval_seconds)

@@ -15,6 +15,7 @@ import datetime
 import wmi
 import requests
 import mimetypes
+import cv2
 
 def encrypt_message(message, key):
     fernet = Fernet(key)
@@ -48,6 +49,39 @@ def get_files(folder):
         elif file.endswith(('.png', '.jpg', '.jpeg', '.gif')):
             files.append({'name': file, 'type': 'image'})
     return files
+
+frame_count = 0
+def extract_frames(video_path, output_folder, interval_seconds):
+    # Open the video file
+    cap = cv2.VideoCapture(video_path)
+    global frame_count
+    
+    if not cap.isOpened():
+        print(f"Error: Could not open video file {video_path}")
+        return
+    
+    # Get the frames per second (fps) of the video
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+
+    # Calculate the number of frames to skip based on the interval_seconds
+    frames_to_skip = fps * interval_seconds
+    
+    while True:
+        ret, frame = cap.read()
+        
+        if not ret:
+            break
+        
+        # Save the frame every 'frames_to_skip' frames
+        if frame_count % frames_to_skip == 0:
+            frame_filename = os.path.join(output_folder, f"frame_{frame_count // frames_to_skip:04d}.jpg")
+            cv2.imwrite(frame_filename, frame)
+        
+        frame_count += 1
+    
+    # Release the video capture object
+    cap.release()
+    print(f"Frames extracted and saved from {video_path} to {output_folder}")
 
 def mail_config():
     # Create or connect to SQLite database
@@ -194,6 +228,7 @@ class FlaskThread(QThread):
             if response.status_code == 200:
                 val=response.json().get('project')
                 details  = val[project_id-1]
+                print(details)
                 self.folder_path = details[6]  # Replace with your folder path containing video and image files
                 video_files = [file for file in get_files(self.folder_path) if file['type'] == 'video']
                 image_files = [file for file in get_files(self.folder_path) if file['type'] == 'image']
@@ -214,6 +249,29 @@ class FlaskThread(QThread):
                 mimetype = 'application/octet-stream'
             print(mimetype)
             return send_file(video_path, mimetype='video/mp4')
+        
+        @self.flask_app.route("/process_video", methods=['GET', 'POST'])
+        def process_video():
+            global frame_count
+            frame_count = 0
+            if request.method == 'POST':
+                #recieve json file
+                # no_frames=
+                # project_id= 
+                # project_directory =
+                # dataset_directory =
+                video_folder = "dataset_directory"
+                output_folder = "project_directory" + "/dataset/images"
+                interval_seconds = "no_frames"
+
+                # Create the output folder if it doesn't exist
+                os.makedirs(output_folder, exist_ok=True)
+                for video_filename in os.listdir(video_folder):
+                    if video_filename.endswith(".mkv") or video_filename.endswith(".mp4") or video_filename.endswith(".ts") or video_filename.endswith(".avi"):
+                        video_path = os.path.join(video_folder, video_filename)
+                        extract_frames(video_path, output_folder, interval_seconds)
+
+            return "as per your requirement"
 
         @self.flask_app.route("/project", methods=['GET', 'POST'])
         def project():
