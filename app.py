@@ -4,7 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtWebEngineWidgets import *
 from PyQt5.QtGui import QIcon 
-from flask import Flask, render_template, redirect, request, send_file
+from flask import Flask, render_template, redirect, request, send_file, jsonify, session
 from werkzeug.serving import WSGIRequestHandler
 import signal
 import sqlite3
@@ -272,7 +272,23 @@ class FlaskThread(QThread):
                     if video_filename.endswith(".mkv") or video_filename.endswith(".mp4") or video_filename.endswith(".ts") or video_filename.endswith(".avi"):
                         video_path = os.path.join(video_folder, video_filename)
                         extract_frames(video_path, output_folder, interval_seconds)
+
             return "completed"
+        
+        
+        @self.flask_app.route("/get_images", methods=['GET', 'POST'])
+        def get_images():
+            if request.method == 'POST':
+                folder_path = request.json.get('dataset_directory') + "datatset/images"
+                session.setdefault('sent_files', [])  # Initialize 'sent_files' in session if not present
+
+                image_files = [file for file in get_files(folder_path) if file['type'] == 'image']
+                new_image_files = [file['name'] for file in image_files if file['name'] not in session['sent_files']]
+                session['sent_files'].extend(new_image_files)
+
+                return jsonify({'image_names': new_image_files})
+
+
 
         @self.flask_app.route("/project", methods=['GET', 'POST'])
         def project():
