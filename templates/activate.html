@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vintage Dialog Box</title>
+    <link rel="stylesheet" href="/static/css/project.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <div>
+        <h1 class="center">Activate your License</h1>
+        <div class="dialog-box">
+            <form id="myForm" action="/project" method="post">
+                <div class="title-bar">
+                    <label for="proj_id">Project ID: </label>
+                    <input required readonly type="text" id="proj_id" name="proj_id" value="{{id}}">
+                    <label for="trans_id">Transaction ID: </label>
+                    <input required type="text" id="trans_id" name="trans_id" placeholder="Enter the transation id">
+                    <label for="amount">Amount Paid: </label>
+                    <input required type="text" id="amount" name="amount" placeholder="Enter the amount paid in Rs">
+                    <label for="plan">Select your plan:</label>
+                    <select id="plan" name="plan" style="width: 250px; height: 30px;">
+                        <option value="Yearly" selected>Yearly Plan</option>
+                        <option value="Monthly" selected>Monthly Plan</option>
+                        <option value="Day" selected>One Day Plan</option>
+                        <option value="Custom" selected>Custom Plan</option>
+                    </select>
+                    
+                    <div class="content">
+                        <input type="button" value="Submit" />
+                        <p class="descriptive">
+                            Refer plans and pricing.<br><br>
+                            Complete the payment and enter the details.<br><br>
+                            <span style="color: red;">No refunds will be entertained.</span> <br>
+                        </p>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="/static/js/script.js"></script>
+</body>
+
+</html>

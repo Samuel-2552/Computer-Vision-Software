@@ -230,13 +230,25 @@ class FlaskThread(QThread):
                 val=response.json().get('project')
                 details  = val[project_id-1]
                 print(details)
-                self.folder_path = details[6]  # Replace with your folder path containing video and image files
-                video_files = [file for file in get_files(self.folder_path) if file['type'] == 'video']
-                image_files = [file for file in get_files(self.folder_path) if file['type'] == 'image']
-                print(image_files)
+                if (datetime.datetime.strptime(details[8], "%Y-%m-%d %H:%M:%S.%f") - datetime.datetime.now()).days >= 0:
+                    self.folder_path = details[6]  # Replace with your folder path containing video and image files
+                    video_files = [file for file in get_files(self.folder_path) if file['type'] == 'video']
+                    image_files = [file for file in get_files(self.folder_path) if file['type'] == 'image']
+                    print(image_files)
+                    return render_template('start.html', details=details,  videos=video_files, images=image_files)
+                else:
+                    return redirect(f'/activate/{project_id}')
+
             else:
                 return "Check your Internet Connection!"
-            return render_template('start.html', details=details,  videos=video_files, images=image_files)
+            
+        
+        @self.flask_app.route('/activate/<int:project_id>')
+        def activate(project_id):
+            sys_id = get_system_id()
+
+            return render_template('activate.html', id=project_id)
+            
         
         @self.flask_app.route('/projects/images/<string:file_name>')
         def image_files(file_name):
@@ -330,7 +342,8 @@ class FlaskThread(QThread):
                 else:
                         print("Failed to send Project data to the web server", 500)
                         return "Check your internet connection and Try again"
-            return render_template('project.html')
+            return "Invalid Link"
+
         self.flask_app.run(host='127.0.0.1', port=54321, threaded=True, request_handler=WSGIRequestHandler)
 
 class Browser(QMainWindow):
