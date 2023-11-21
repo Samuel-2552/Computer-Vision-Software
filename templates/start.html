@@ -79,6 +79,7 @@
             const json = {};
             json.seconds = parseInt(document.getElementById('seconds').value);
             json.projectId = "{{ details[2] }}"
+            
             fetch("/process_video", {
                 method: 'POST',
                 headers: {
