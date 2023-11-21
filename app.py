@@ -232,6 +232,7 @@ class FlaskThread(QThread):
                 self.folder_path = details[6]  # Replace with your folder path containing video and image files
                 video_files = [file for file in get_files(self.folder_path) if file['type'] == 'video']
                 image_files = [file for file in get_files(self.folder_path) if file['type'] == 'image']
+                print(image_files)
             else:
                 return "Check your Internet Connection!"
             return render_template('start.html', details=details,  videos=video_files, images=image_files)
@@ -256,13 +257,14 @@ class FlaskThread(QThread):
             frame_count = 0
             if request.method == 'POST':
                 #recieve json file
-                # no_frames=
-                # project_id= 
-                # project_directory =
-                # dataset_directory =
-                video_folder = "dataset_directory"
-                output_folder = "project_directory" + "/dataset/images"
-                interval_seconds = "no_frames"
+                data = request.json
+                no_frames = data.get('seconds')
+                # project_id =  data.get('projectId')
+                project_directory = data.get('projectDirectory')
+                dataset_directory = data.get('datasetDirectory')
+                video_folder = dataset_directory
+                output_folder = project_directory + "/dataset/images"
+                interval_seconds = no_frames
 
                 # Create the output folder if it doesn't exist
                 os.makedirs(output_folder, exist_ok=True)
@@ -270,8 +272,7 @@ class FlaskThread(QThread):
                     if video_filename.endswith(".mkv") or video_filename.endswith(".mp4") or video_filename.endswith(".ts") or video_filename.endswith(".avi"):
                         video_path = os.path.join(video_folder, video_filename)
                         extract_frames(video_path, output_folder, interval_seconds)
-
-            return "as per your requirement"
+            return "completed"
 
         @self.flask_app.route("/project", methods=['GET', 'POST'])
         def project():
