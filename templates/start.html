@@ -18,13 +18,12 @@
     <h1>{{ details[3] }}</h1>
 
     <h2>Videos</h2>
-    <form method="post" action="">
-
+    <form method="post" id="video_form">
         <div class="flex-container section column">
             <div class="controls">
-                <input type="range" id="seconds" min="1" max="50" value="5" oninput="updateSeconds()"/>
+                <input type="range" id="seconds" min="1" max="50" value="5" oninput="updateSeconds()" />
                 <span id="output">5</span>
-                <input type="submit" value="Extract"/>
+                <input type="submit" value="Extract" />
             </div>
             {% for video in videos %}
             <label for="{{ video.name }}">
@@ -50,11 +49,11 @@
         }
         const setSelect = (node, id) => {
             var cb = document.getElementById(id)
-            if(!cb.checked){
+            if (!cb.checked) {
                 node.style.backgroundColor = "#c6c6c5"
                 selected_videos.push(cb.value);
             }
-            else{
+            else {
                 node.style.backgroundColor = "white"
                 selected_videos.splice(selected_videos.indexOf(id));
             }
@@ -73,7 +72,28 @@
                 )
             }
         )
-        
+
+        const form = document.getElementById('video_form');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const json = {};
+            json.seconds = parseInt(document.getElementById('seconds').value);
+            json.projectId = "{{ details[2] }}"
+            fetch("/process_video", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(json),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        })
     </script>
 
     <h2>Images</h2>
