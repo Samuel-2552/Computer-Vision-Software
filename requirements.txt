@@ -1,0 +1,9 @@
+Flask
+pyqt5
+pyqtwebengine
+Flask-Mail
+lxml
+cryptography
+wmi
+requests
+opencv-python-headless
