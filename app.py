@@ -218,9 +218,6 @@ class FlaskThread(QThread):
                 return "Check your Internet Connection"
             return render_template('existing_project.html', project=val, datetime=datetime)
         
-        @self.flask_app.route("/productKey")
-        def productKey():
-            return render_template('productKey.html')
         
         @self.flask_app.route('/projects/<int:project_id>')
         def project_details(project_id):
@@ -246,11 +243,37 @@ class FlaskThread(QThread):
             
         @self.flask_app.route('/labelimg/<int:project_id>')
         def labelimg(project_id):
-            browser_instance = Browser()  # Create an instance of the Browser class
-            browser_instance.open_labelimg(self)  # Call the open_labelimg method through the instance
+            conn = sqlite3.connect('labelimg.db')
+            cursor = conn.cursor()
+            cursor.execute('''
+            UPDATE labelimg
+            SET window = 1
+            WHERE rowid = 1
+        ''')
+            conn.commit()
+            conn.close()
 
+            conn = sqlite3.connect('labeldetails.db')
+            cursor = conn.cursor()
+            sys_id = get_system_id()
+            user_data = {'sys_id': sys_id}
+            web_server_url = 'https://icvs.pythonanywhere.com/get-project'  # Replace with your web server URL
+            response = requests.post(web_server_url, json=user_data)
+            if response.status_code == 200:
+                val=response.json().get('project')
+                details  = val[project_id-1]
+                folder= details[4]
+                folder = folder + "/dataset/images"
+                cursor.execute('''
+                UPDATE labeldetails
+                SET proj_id = ?, proj_direct = ?
+                WHERE id = ?
+            ''', (project_id, folder, 1))  # Assuming you want to update the row with id = 1
 
-            render_template('colab.html')
+                conn.commit()
+                conn.close()  # Close the connection after committing changes
+
+            return render_template('colab.html')
             
         
         @self.flask_app.route('/activate/<int:project_id>', methods=['GET', 'POST'])
@@ -393,12 +416,9 @@ class Browser(QMainWindow):
     def __init__(self):
         super(Browser, self).__init__()
 
-        
-
-        # Create a QTimer to check the database value every 5 seconds
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.check_database_value)
-        self.timer.start(2000)  # Check every 5 seconds
+        self.timer.start(1000)  
 
         # Set the application icon
         self.setWindowIcon(QIcon('static\img\logo.png'))  # Replace 'path_to_your_icon.png' with the actual path to your icon
@@ -443,32 +463,31 @@ class Browser(QMainWindow):
         productKey.triggered.connect(self.pricing)
         activate.addAction(productKey)
 
-        # Create an action to open labelImg.py
-        openLabelImgAction = QAction('Open LabelImg', self)
-        openLabelImgAction.triggered.connect(self.open_labelimg)
-        menubar.addAction(openLabelImgAction)
-
 
 
     # Define a custom signal for closing the Flask app
     closing = pyqtSignal()
 
     def open_labelimg(self):
-        self.setEnabled(not self.isEnabled())
-        self.timer.start()
-        # Update the database value to 1 when the LabelImg button is clicked
         conn = sqlite3.connect('labelimg.db')
         cursor = conn.cursor()
         cursor.execute('''
+            SELECT window
+            FROM labelimg
+            WHERE id = 2
+        ''')
+        result = cursor.fetchone()
+        if result[0] == 0:
+            self.setEnabled(False)
+            # Start the LabelImg application
+            subprocess.Popen(["python", "labelImg.py"])
+            cursor.execute('''
             UPDATE labelimg
             SET window = 1
-            WHERE rowid = 1
-        ''')
-        conn.commit()
-        conn.close()
-
-        # Start the LabelImg application
-        subprocess.Popen(["python", "labelImg.py"])
+            WHERE id = 2
+            ''')
+            conn.commit()
+            conn.close()
 
     def check_database_value(self):
         # Check the value of the 'window' column in the database
@@ -477,14 +496,16 @@ class Browser(QMainWindow):
         cursor.execute('''
             SELECT window
             FROM labelimg
-            WHERE rowid = 1
+            WHERE id = 1
         ''')
         result = cursor.fetchone()
         conn.close()
 
         if result[0] == 0:  # If the value is 0, enable the window
             self.setEnabled(True)
-            self.timer.stop()
+
+        if result[0] == 1:  # If the value is 0, enable the window
+            self.open_labelimg()
    
 
 

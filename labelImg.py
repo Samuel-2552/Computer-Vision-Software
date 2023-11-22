@@ -84,6 +84,26 @@ class MainWindow(QMainWindow, WindowMixin):
         self.default_save_dir = default_save_dir
         self.label_file_format = settings.get(SETTING_LABEL_FILE_FORMAT, LabelFileFormat.PASCAL_VOC)
 
+        conn = sqlite3.connect('labeldetails.db')
+        cursor = conn.cursor()
+
+        # Retrieve values from the table where id is 1
+        cursor.execute('''
+            SELECT proj_id, proj_direct
+            FROM labeldetails
+            WHERE id = ?
+        ''', (1,))  # Assuming you want to retrieve values where id = 1
+
+        row = cursor.fetchone()
+
+        if row:
+            proj_id, proj_direct = row
+            print(f"proj_id: {proj_id}, proj_direct: {proj_direct}")
+        else:
+            print("No data found for the specified ID.")
+
+        conn.close()
+
         # For loading all image under a directory
         self.m_img_list = []
         self.dir_name = None
@@ -439,17 +459,20 @@ class MainWindow(QMainWindow, WindowMixin):
 
         self.tools = self.toolbar('Tools')
         self.actions.beginner = (
-            open, open_dir, open_next_image, open_prev_image, verify, save, save_format, None, create, copy, delete, None,
+            open_next_image, open_prev_image, verify, save, save_format, None, create, copy, delete, None,
             zoom_in, zoom, zoom_out, fit_window, fit_width, None,
             light_brighten, light, light_darken, light_org)
 
         self.actions.advanced = (
-            open, open_dir, open_next_image, open_prev_image, save, save_format, None,
+            open_next_image, open_prev_image, save, save_format, None,
             create_mode, edit_mode, None,
             hide_all, show_all)
 
         self.statusBar().showMessage('%s started.' % __appname__)
         self.statusBar().show()
+
+        
+
 
         # Application state.
         self.image = QImage()
@@ -1270,7 +1293,12 @@ class MainWindow(QMainWindow, WindowMixin):
         cursor.execute('''
             UPDATE labelimg
             SET window = 0
-            WHERE rowid = 1
+            WHERE id = 1
+        ''')
+        cursor.execute('''
+            UPDATE labelimg
+            SET window = 0
+            WHERE id = 2
         ''')
         conn.commit()
         conn.close()
