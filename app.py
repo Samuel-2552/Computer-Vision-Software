@@ -16,6 +16,7 @@ import wmi
 import requests
 import mimetypes
 import cv2
+import subprocess
 
 def encrypt_message(message, key):
     fernet = Fernet(key)
@@ -217,9 +218,6 @@ class FlaskThread(QThread):
                 return "Check your Internet Connection"
             return render_template('existing_project.html', project=val, datetime=datetime)
         
-        @self.flask_app.route("/productKey")
-        def productKey():
-            return render_template('productKey.html')
         
         @self.flask_app.route('/projects/<int:project_id>')
         def project_details(project_id):
@@ -242,6 +240,40 @@ class FlaskThread(QThread):
 
             else:
                 return "Check your Internet Connection!"
+            
+        @self.flask_app.route('/labelimg/<int:project_id>')
+        def labelimg(project_id):
+            conn = sqlite3.connect('labelimg.db')
+            cursor = conn.cursor()
+            cursor.execute('''
+            UPDATE labelimg
+            SET window = 1
+            WHERE rowid = 1
+        ''')
+            conn.commit()
+            conn.close()
+
+            conn = sqlite3.connect('labeldetails.db')
+            cursor = conn.cursor()
+            sys_id = get_system_id()
+            user_data = {'sys_id': sys_id}
+            web_server_url = 'https://icvs.pythonanywhere.com/get-project'  # Replace with your web server URL
+            response = requests.post(web_server_url, json=user_data)
+            if response.status_code == 200:
+                val=response.json().get('project')
+                details  = val[project_id-1]
+                folder= details[4]
+                folder = folder + "/dataset/images"
+                cursor.execute('''
+                UPDATE labeldetails
+                SET proj_id = ?, proj_direct = ?
+                WHERE id = ?
+            ''', (project_id, folder, 1))  # Assuming you want to update the row with id = 1
+
+                conn.commit()
+                conn.close()  # Close the connection after committing changes
+
+            return render_template('colab.html')
             
         
         @self.flask_app.route('/activate/<int:project_id>', methods=['GET', 'POST'])
@@ -383,6 +415,11 @@ class FlaskThread(QThread):
 class Browser(QMainWindow):
     def __init__(self):
         super(Browser, self).__init__()
+
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.check_database_value)
+        self.timer.start(1000)  
+
         # Set the application icon
         self.setWindowIcon(QIcon('static\img\logo.png'))  # Replace 'path_to_your_icon.png' with the actual path to your icon
         self.browser = QWebEngineView()
@@ -422,14 +459,56 @@ class Browser(QMainWindow):
         fileMenu.addAction(exitAction)
         # Create a "Activate License" menu
         activate = menubar.addMenu('License')
-        productKey = QAction(QIcon('static/img/key.png'), 'Product Key', self)
-        productKey.triggered.connect(self.product_key)
-        activate.addAction(productKey)
         productKey = QAction(QIcon('static/img/price.png'), 'Pricing and Plans', self)
         productKey.triggered.connect(self.pricing)
         activate.addAction(productKey)
+
+
+
     # Define a custom signal for closing the Flask app
     closing = pyqtSignal()
+
+    def open_labelimg(self):
+        conn = sqlite3.connect('labelimg.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT window
+            FROM labelimg
+            WHERE id = 2
+        ''')
+        result = cursor.fetchone()
+        if result[0] == 0:
+            self.setEnabled(False)
+            # Start the LabelImg application
+            subprocess.Popen(["python", "labelImg.py"])
+            cursor.execute('''
+            UPDATE labelimg
+            SET window = 1
+            WHERE id = 2
+            ''')
+            conn.commit()
+            conn.close()
+
+    def check_database_value(self):
+        # Check the value of the 'window' column in the database
+        conn = sqlite3.connect('labelimg.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT window
+            FROM labelimg
+            WHERE id = 1
+        ''')
+        result = cursor.fetchone()
+        conn.close()
+
+        if result[0] == 0:  # If the value is 0, enable the window
+            self.setEnabled(True)
+
+        if result[0] == 1:  # If the value is 0, enable the window
+            self.open_labelimg()
+   
+
+
 
     def open_new_project(self):
         # Redirect to the Flask route for new project
@@ -438,10 +517,6 @@ class Browser(QMainWindow):
     def open_existing_project(self):
         # Redirect to the Flask route for existing project
         self.browser.setUrl(QUrl("http://127.0.0.1:54321/existing_project"))
-
-    def product_key(self):
-        # Redirect to the Flask route for product key
-        self.browser.setUrl(QUrl("http://127.0.0.1:54321/productKey"))
 
     def pricing(self):
         # Redirect to the Flask route for product key

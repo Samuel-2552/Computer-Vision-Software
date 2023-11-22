@@ -1,2 +1,5 @@
+Face
+Eyes
+Seatbelt
 Tire
 Operator
