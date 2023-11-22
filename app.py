@@ -16,6 +16,7 @@ import wmi
 import requests
 import mimetypes
 import cv2
+import subprocess
 
 def encrypt_message(message, key):
     fernet = Fernet(key)
@@ -243,6 +244,14 @@ class FlaskThread(QThread):
             else:
                 return "Check your Internet Connection!"
             
+        @self.flask_app.route('/labelimg/<int:project_id>')
+        def labelimg(project_id):
+            browser_instance = Browser()  # Create an instance of the Browser class
+            browser_instance.open_labelimg(self)  # Call the open_labelimg method through the instance
+
+
+            render_template('colab.html')
+            
         
         @self.flask_app.route('/activate/<int:project_id>', methods=['GET', 'POST'])
         def activate(project_id):
@@ -383,6 +392,14 @@ class FlaskThread(QThread):
 class Browser(QMainWindow):
     def __init__(self):
         super(Browser, self).__init__()
+
+        
+
+        # Create a QTimer to check the database value every 5 seconds
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.check_database_value)
+        self.timer.start(2000)  # Check every 5 seconds
+
         # Set the application icon
         self.setWindowIcon(QIcon('static\img\logo.png'))  # Replace 'path_to_your_icon.png' with the actual path to your icon
         self.browser = QWebEngineView()
@@ -422,14 +439,55 @@ class Browser(QMainWindow):
         fileMenu.addAction(exitAction)
         # Create a "Activate License" menu
         activate = menubar.addMenu('License')
-        productKey = QAction(QIcon('static/img/key.png'), 'Product Key', self)
-        productKey.triggered.connect(self.product_key)
-        activate.addAction(productKey)
         productKey = QAction(QIcon('static/img/price.png'), 'Pricing and Plans', self)
         productKey.triggered.connect(self.pricing)
         activate.addAction(productKey)
+
+        # Create an action to open labelImg.py
+        openLabelImgAction = QAction('Open LabelImg', self)
+        openLabelImgAction.triggered.connect(self.open_labelimg)
+        menubar.addAction(openLabelImgAction)
+
+
+
     # Define a custom signal for closing the Flask app
     closing = pyqtSignal()
+
+    def open_labelimg(self):
+        self.setEnabled(not self.isEnabled())
+        self.timer.start()
+        # Update the database value to 1 when the LabelImg button is clicked
+        conn = sqlite3.connect('labelimg.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE labelimg
+            SET window = 1
+            WHERE rowid = 1
+        ''')
+        conn.commit()
+        conn.close()
+
+        # Start the LabelImg application
+        subprocess.Popen(["python", "labelImg.py"])
+
+    def check_database_value(self):
+        # Check the value of the 'window' column in the database
+        conn = sqlite3.connect('labelimg.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT window
+            FROM labelimg
+            WHERE rowid = 1
+        ''')
+        result = cursor.fetchone()
+        conn.close()
+
+        if result[0] == 0:  # If the value is 0, enable the window
+            self.setEnabled(True)
+            self.timer.stop()
+   
+
+
 
     def open_new_project(self):
         # Redirect to the Flask route for new project
@@ -438,10 +496,6 @@ class Browser(QMainWindow):
     def open_existing_project(self):
         # Redirect to the Flask route for existing project
         self.browser.setUrl(QUrl("http://127.0.0.1:54321/existing_project"))
-
-    def product_key(self):
-        # Redirect to the Flask route for product key
-        self.browser.setUrl(QUrl("http://127.0.0.1:54321/productKey"))
 
     def pricing(self):
         # Redirect to the Flask route for product key

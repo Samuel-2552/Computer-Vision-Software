@@ -38,6 +38,7 @@ from libs.create_ml_io import CreateMLReader
 from libs.create_ml_io import JSON_EXT
 from libs.ustr import ustr
 from libs.hashableQListWidgetItem import HashableQListWidgetItem
+import sqlite3
 
 __appname__ = 'Industrial Computer Vision Software'
 
@@ -1264,6 +1265,15 @@ class MainWindow(QMainWindow, WindowMixin):
         settings[SETTING_DRAW_SQUARE] = self.draw_squares_option.isChecked()
         settings[SETTING_LABEL_FILE_FORMAT] = self.label_file_format
         settings.save()
+        conn = sqlite3.connect('labelimg.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE labelimg
+            SET window = 0
+            WHERE rowid = 1
+        ''')
+        conn.commit()
+        conn.close()
 
     def load_recent(self, filename):
         if self.may_continue():
