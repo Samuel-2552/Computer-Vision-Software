@@ -42,6 +42,16 @@ import sqlite3
 
 __appname__ = 'Industrial Computer Vision Software'
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
 
 class WindowMixin(object):
 
@@ -1270,7 +1280,7 @@ class MainWindow(QMainWindow, WindowMixin):
         settings[SETTING_DRAW_SQUARE] = self.draw_squares_option.isChecked()
         settings[SETTING_LABEL_FILE_FORMAT] = self.label_file_format
         settings.save()
-        conn = sqlite3.connect('labelimg.db')
+        conn = sqlite3.connect(resource_path('labelimg.db'))
         cursor = conn.cursor()
         cursor.execute('''
             UPDATE labelimg
@@ -1332,7 +1342,7 @@ class MainWindow(QMainWindow, WindowMixin):
         else:
             default_open_dir_path = os.path.dirname(self.file_path) if self.file_path else '.'
         if silent != True:
-            conn = sqlite3.connect('labeldetails.db')
+            conn = sqlite3.connect(resource_path('labeldetails.db'))
             cursor = conn.cursor()
 
             # Retrieve values from the table where id is 1

@@ -10,13 +10,22 @@ import signal
 import sqlite3
 from cryptography.fernet import Fernet
 from flask_mail import Mail, Message
-import uuid
 import datetime
 import wmi
 import requests
 import mimetypes
 import cv2
 import subprocess
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 def encrypt_message(message, key):
     fernet = Fernet(key)
@@ -86,7 +95,7 @@ def extract_frames(video_path, output_folder, interval_seconds):
 
 def mail_config():
     # Create or connect to SQLite database
-    conn = sqlite3.connect('email.db')
+    conn = sqlite3.connect(resource_path('email.db'))
     cursor = conn.cursor()
 
     # Retrieve encrypted credentials from the database
@@ -107,7 +116,7 @@ def mail_config():
 class FlaskThread(QThread):
     def run(self):
         # Create Flask app and set the request handler to WSGIRequestHandler
-        self.flask_app = Flask(__name__)
+        self.flask_app = Flask(__name__, template_folder=resource_path('templates'), static_folder=resource_path('static'))
         self.flask_app.secret_key = 'sdfjhskjdh sjdfhkj sfh3777439'
         # Configure mail settings for Gmail
         self.flask_app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -152,7 +161,7 @@ class FlaskThread(QThread):
                         mail.send(msg)
                         print('Email sent successfully!', 'success')
                         # Update the 'email' table (to send the details as email during initial setup for back up)
-                        with sqlite3.connect('email.db') as conn:
+                        with sqlite3.connect(resource_path('email.db')) as conn:
                             cursor = conn.cursor()
                             cursor.execute('''UPDATE email
                                             SET initial = 1
@@ -176,7 +185,7 @@ class FlaskThread(QThread):
                 val=response.json().get('exists')
                 if val:
                     # Update the 'email' table (to send the details as email during initial setup for back up)
-                    with sqlite3.connect('email.db') as conn:
+                    with sqlite3.connect(resource_path('email.db')) as conn:
                         cursor = conn.cursor()
                         cursor.execute('''UPDATE email
                                         SET initial = 1
@@ -184,7 +193,7 @@ class FlaskThread(QThread):
                                     ''')
                         conn.commit()
             # Establish connection to the database
-            conn = sqlite3.connect('email.db')
+            conn = sqlite3.connect(resource_path('email.db'))
             cursor = conn.cursor()
             cursor.execute('''SELECT initial
                             FROM email
@@ -243,7 +252,7 @@ class FlaskThread(QThread):
             
         @self.flask_app.route('/labelimg/<int:project_id>')
         def labelimg(project_id):
-            conn = sqlite3.connect('labelimg.db')
+            conn = sqlite3.connect(resource_path('labelimg.db'))
             cursor = conn.cursor()
             cursor.execute('''
             UPDATE labelimg
@@ -253,7 +262,7 @@ class FlaskThread(QThread):
             conn.commit()
             conn.close()
 
-            conn = sqlite3.connect('labeldetails.db')
+            conn = sqlite3.connect(resource_path('labeldetails.db'))
             cursor = conn.cursor()
             sys_id = get_system_id()
             user_data = {'sys_id': sys_id}
@@ -469,7 +478,7 @@ class Browser(QMainWindow):
     closing = pyqtSignal()
 
     def open_labelimg(self):
-        conn = sqlite3.connect('labelimg.db')
+        conn = sqlite3.connect(resource_path('labelimg.db'))
         cursor = conn.cursor()
         cursor.execute('''
             SELECT window
@@ -480,7 +489,7 @@ class Browser(QMainWindow):
         if result[0] == 0:
             self.setEnabled(False)
             # Start the LabelImg application
-            subprocess.Popen(["python", "labelImg.py"])
+            subprocess.Popen(["python", resource_path("labelImg.py")])
             cursor.execute('''
             UPDATE labelimg
             SET window = 1
@@ -491,7 +500,7 @@ class Browser(QMainWindow):
 
     def check_database_value(self):
         # Check the value of the 'window' column in the database
-        conn = sqlite3.connect('labelimg.db')
+        conn = sqlite3.connect(resource_path('labelimg.db'))
         cursor = conn.cursor()
         cursor.execute('''
             SELECT window
