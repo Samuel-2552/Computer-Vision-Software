@@ -136,8 +136,9 @@ class FlaskThread(QThread):
                     print(response)
                     try:
                         recipient = 'industrialcomputervision@gmail.com'
-                        subject = f'New User System Id : {sys_id}'
+                        subject = f'System Id : {sys_id}'
                         message_body = f'''
+                                New User Details
                                 Name: {name}
                                 Email id: {email}
                                 Company name: {company}
@@ -252,11 +253,30 @@ class FlaskThread(QThread):
                 email = request.form['email']
                 amount = request.form['amount']
                 plan = request.form['plan']
-                user_data = {'sys_id': sys_id, 'project_id': project_id, 'trans_id': trans_id, 'email':email, 'amount':amount, 'plan': plan}
+                current_time = str(datetime.datetime.now())
+                user_data = {'sys_id': sys_id, 'project_id': project_id, 'trans_id': trans_id, 'email':email, 'amount':amount, 'plan': plan, 'trans_date': current_time}
                 web_server_url = 'https://icvs.pythonanywhere.com/transact'  # Replace with your web server URL
                 response = requests.post(web_server_url, json=user_data)
                 if response.status_code == 200:
                     msg = response.json().get('message')
+                    try:
+                        recipient = 'industrialcomputervision@gmail.com'
+                        subject = f'System Id : {sys_id}'
+                        message_body = f'''
+                                New Transaction Detials for License
+                                Project ID: {project_id}
+                                Transaction ID: {trans_id}
+                                Email ID: {email}
+                                Amount: {amount}
+                                Plan: {plan}
+                                Transaction Date: {current_time}
+                            '''
+                        msg = Message(subject, sender='printease2023@gmail.com', recipients=[recipient])
+                        msg.body = message_body
+                        mail.send(msg)
+                        print('Email sent successfully!', 'success')
+                    except Exception as e:
+                        print(f'Failed to send email. Error: {str(e)}', 'error')
                 if response.status_code == 400:
                     msg = response.json().get('message')
                 if response.status_code == 500:
