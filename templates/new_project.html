@@ -24,7 +24,6 @@
         .modal-content {
             background-color: #fff;
             width: 300px;
-            /* Adjust width as needed */
             padding: 15px;
             border: 1px solid #ccc;
             border-radius: 4px;
@@ -52,6 +51,13 @@
 
         .modal-content button:hover {
             background-color: #0056b3;
+        }
+
+        textarea{
+            resize: none;
+            width: 400px;
+            height: 60px;
+            overflow: auto;
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -89,14 +95,38 @@
     </div>
     <h1 class="center">Plans and Pricing</h1>
     <div class="flex-container">
-        <div class="card">
-            <h3 class="center">Free Plan</h3>
+        <div class="card flex-container column">
+            <h3 class="center">One Day Plan</h3>
+            <h2>One Project: &#8377; <s>100</s> 50</h2>
+            <p class="center">Valid till Feb 2024</p>
         </div>
-        <div class="card">
+        <div class="card flex-container column">
             <h3 class="center">Monthly Plan</h3>
+            <h2>One Project: &#8377; <s>2500</s> 10000</h2>
+            <p class="center">Valid till Feb 2024</p>
         </div>
-        <div class="card">
+        <div class="card flex-container column">
             <h3 class="center">Yearly Plan</h3>
+            <h2>One Project: &#8377; <s>18000</s> 1000</h2>
+            <p class="center">Valid till Feb 2024</p>
+        </div>
+        <div class="card flex-container column">
+            <h3 class="center">Custom Plan</h3>
+            <form>
+                <div>
+                    No. of Projects: <input type="number" value="0"/>
+                </div>
+                <div>
+                    No. of Validity: <input type="number" value="0"/>
+                </div>
+                <div>
+                    Email: <input type="email"/>
+                </div>
+                <div>
+                    Comments:<textarea ></textarea>
+                </div>
+                <input type="submit" value="Submit">
+            </form>
         </div>
     </div>
     <script src="/static/js/script.js"></script>

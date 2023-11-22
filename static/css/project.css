@@ -35,10 +35,10 @@
     transform: translateX(-50%);
 }
 
-form {
+/* form {
     width: 300px;
     border-radius: 10px;
-}
+} */
 
 label {
     display: block;
