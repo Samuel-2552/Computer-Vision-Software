@@ -322,7 +322,7 @@ class FlaskThread(QThread):
                         video_path = os.path.join(video_folder, video_filename)
                         extract_frames(video_path, output_folder, interval_seconds)
 
-            return "completed"
+            return {"data":"completed"}
         
         
         @self.flask_app.route("/get_images", methods=['GET', 'POST'])

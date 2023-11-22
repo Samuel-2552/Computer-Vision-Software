@@ -5,11 +5,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="/static/css/index.css">
     <link rel="stylesheet" href="/static/css/style.css">
     <title>Industrial CV Software</title>
     <style>
         .section {
             justify-content: space-between;
+        }
+
+        #extractButton:disabled {
+            background-color: #ccc;
+            /* Change the background color */
+            color: #666;
+            /* Change the text color */
+            cursor: not-allowed;
+            /* Change cursor style to indicate not allowed */
         }
     </style>
 </head>
@@ -23,7 +34,7 @@
             <div class="controls">
                 <input type="range" id="seconds" min="1" max="50" value="5" oninput="updateSeconds()" />
                 <span id="output">5</span>
-                <input type="submit" value="Extract" />
+                <input type="submit" value="Extract" id="extractButton" /> <!-- Add an ID to the "Extract" button -->
             </div>
             {% for video in videos %}
             <label for="{{ video.name }}">
@@ -43,9 +54,14 @@
         </div>
     </form>
 
+    <div class="loading-screen" id="loadingScreen">
+        <p id="loadingMessage">Processing...</p>
+        <div class="loading-dots"></div>
+    </div>
+
     <h2>Images</h2>
     <div class="flex-container section" id="images">
-        
+
     </div>
     <script>
         function getImages() {
@@ -81,6 +97,20 @@
             setInterval(getImages, 5000)
         }
 
+        function stopFetching() {
+            clearInterval(getImages); // Clear the interval when called
+        }
+
+        function addProceedButton() {
+            const proceedButton = document.createElement('button');
+            proceedButton.textContent = 'Proceed';
+            proceedButton.addEventListener('click', () => {
+                window.location.href = `/labelimage{{ details[2] }}`; // Redirect on click
+            });
+
+            document.body.appendChild(proceedButton); // Append the button to the body or an appropriate container
+        }
+
         var selected_videos = [];
         const updateSeconds = () => {
             document.getElementById('output').innerHTML = document.getElementById('seconds').value
@@ -114,6 +144,13 @@
         const form = document.getElementById('video_form');
         form.addEventListener('submit', (e) => {
             e.preventDefault();
+            const extractButton = document.getElementById('extractButton');
+            extractButton.disabled = true; // Disable the button
+
+
+            // Show loading screen
+            document.getElementById('loadingScreen').style.display = 'flex';
+
             const json = {};
             json.seconds = parseInt(document.getElementById('seconds').value);
             json.projectId = "{{ details[2] }}"
@@ -129,7 +166,11 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data);
+                    stopFetching();
+                    console.log("Completed" + data);
+
+                    document.getElementById('loadingScreen').style.display = 'none';
+                    addProceedButton();
                 })
                 .catch(error => {
                     console.error('Error:', error);
