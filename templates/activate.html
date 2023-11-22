@@ -85,7 +85,7 @@
     <div>
         <h1 class="center">Activate your License</h1>
         <div class="dialog-box">
-            <form id="myForm" action="/project" method="post">
+            <form id="myForm" action="/activate/{{id}}" method="post">
                 <div class="title-bar">
                     <label for="proj_id">Project ID: </label>
                     <input required readonly type="text" id="proj_id" name="proj_id" value="{{id}}">
@@ -104,7 +104,7 @@
                     </select>
 
                     <div class="content">
-                        <input type="button" value="Submit" />
+                        <input type="submit" value="Submit" />
                         <p class="descriptive">
                             Refer plans and pricing.<br><br>
                             Complete the payment and enter the details.<br><br>
