@@ -54,6 +54,33 @@
         .modal-content button:hover {
             background-color: #0056b3;
         }
+
+        textarea {
+            resize: none;
+            width: 400px;
+            height: 60px;
+            overflow: auto;
+        }
+
+        .card {
+            flex-basis: 23%;
+            background-color: #ccc;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 3px 3px 5px #888888;
+            height: 300px;
+        }
+
+        form.myform {
+            width: 300px;
+            background-color: #c0c0c0;
+            /* Form background color */
+            padding: 20px;
+            border: 2px solid #000000;
+            /* Form border color */
+            border-radius: 10px;
+            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
+        }
     </style>
 </head>
 
@@ -100,6 +127,42 @@
             </form>
         </div>
     </div>
+    <div class="flex-container">
+        <div class="card flex-container column">
+            <h3 class="center">One Day Plan</h3>
+            <h2>One Project: &#8377; <s>100</s> 50</h2>
+            <p class="center">Valid till Feb 2024</p>
+        </div>
+        <div class="card flex-container column">
+            <h3 class="center">Monthly Plan</h3>
+            <h2>One Project: &#8377; <s>2500</s> 1000</h2>
+            <p class="center">Valid till Feb 2024</p>
+        </div>
+        <div class="card flex-container column">
+            <h3 class="center">Yearly Plan</h3>
+            <h2>One Project: &#8377; <s>18000</s> 10000 </h2>
+            <p class="center">Valid till Feb 2024</p>
+        </div>
+        <div class="card flex-container column">
+            <h3 class="center">Custom Plan</h3>
+            <form>
+                <div>
+                    No. of Projects: <input type="number" value="0" />
+                </div>
+                <div>
+                    Validity: <input type="number" value="0" />
+                </div>
+                <div>
+                    Email: <input type="email" />
+                </div>
+                <div>
+                    Comments:<textarea></textarea>
+                </div>
+                <input type="submit" value="Submit">
+            </form>
+        </div>
+    </div>
+
     {% if msg %}
     <script>
         // Call the function to initiate the redirection
@@ -127,12 +190,6 @@
                 elements[i].disabled = disable;
             }
         }
-
-        // Define the URL you want to redirect to
-
-        
-
-
     </script>
     {% endif %}
 </body>
