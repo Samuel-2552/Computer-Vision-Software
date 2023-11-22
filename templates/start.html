@@ -14,13 +14,16 @@
             justify-content: space-between;
         }
 
+        #images{
+            max-height: 600px;
+            border: 1px solid grey;
+            overflow: auto;
+        }
+
         #extractButton:disabled {
             background-color: #ccc;
-            /* Change the background color */
             color: #666;
-            /* Change the text color */
             cursor: not-allowed;
-            /* Change cursor style to indicate not allowed */
         }
     </style>
 </head>
@@ -64,6 +67,7 @@
 
     </div>
     <script>
+        var interval;
         function getImages() {
             const images = document.getElementById('images');
             fetch("/get_images", {
@@ -74,31 +78,34 @@
                 body: JSON.stringify({ 'projectDirectory': "{{ details[4] }}" })
             }).then(response => response.json())
                 .then(data => {
-                    images.innerHTML = "";
                     data.image_names.forEach(
                         name => {
-                            let div = document.createElement('div');
-                            let img = document.createElement('img')
-                            img.src = `images/${name}`
-                            img.alt = name;
-                            img.width = 150;
-                            img.height = 100;
-                            div.appendChild(img);
-                            let p = document.createElement('p');
-                            p.innerHTML = name;
-                            div.appendChild(p);
-                            images.appendChild(div);
+                            if (document.getElementById(name) == null) {
+                                let div = document.createElement('div');
+                                let img = document.createElement('img')
+                                img.src = `images/${name}`
+                                img.alt = name;
+                                img.id = name;
+                                img.width = 150;
+                                img.height = 100;
+                                div.appendChild(img);
+                                let p = document.createElement('p');
+                                p.innerHTML = name;
+                                div.appendChild(p);
+                                images.appendChild(div);
+                                images.scrollTop = images.scrollHeight
+                            }
                         }
                     )
                 }).catch(error => { console.log(error) });
         }
 
         function startFetching() {
-            setInterval(getImages, 5000)
+            interval = setInterval(getImages, 5000)
         }
 
         function stopFetching() {
-            clearInterval(getImages); // Clear the interval when called
+            clearInterval(interval); // Clear the interval when called
         }
 
         function addProceedButton() {
@@ -145,18 +152,13 @@
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             const extractButton = document.getElementById('extractButton');
-            extractButton.disabled = true; // Disable the button
-
-
-            // Show loading screen
+            extractButton.disabled = true;
             document.getElementById('loadingScreen').style.display = 'flex';
-
             const json = {};
             json.seconds = parseInt(document.getElementById('seconds').value);
             json.projectId = "{{ details[2] }}"
             json.projectDirectory = "{{ details[4] }}"
             json.datasetDirectory = "{{ details[6] }}"
-            // startFetching();
             fetch("/process_video", {
                 method: 'POST',
                 headers: {
