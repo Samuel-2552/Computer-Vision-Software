@@ -256,11 +256,11 @@ class FlaskThread(QThread):
                 web_server_url = 'https://icvs.pythonanywhere.com/transact'  # Replace with your web server URL
                 response = requests.post(web_server_url, json=user_data)
                 if response.status_code == 200:
-                    msg = response.json.get('message')
+                    msg = response.json().get('message')
                 if response.status_code == 400:
-                    msg = response.json.get('message')
+                    msg = response.json().get('message')
                 if response.status_code == 500:
-                    msg = response.json.get('message')
+                    msg = response.json().get('message')
             return render_template('activate.html', id=project_id, msg=msg)
             
         
