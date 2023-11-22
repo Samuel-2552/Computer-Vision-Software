@@ -246,6 +246,7 @@ class FlaskThread(QThread):
         @self.flask_app.route('/activate/<int:project_id>', methods=['GET', 'POST'])
         def activate(project_id):
             sys_id = get_system_id()
+            msg=None
             if request.method == 'POST':
                 trans_id = request.form['trans_id']
                 email = request.form['email']
