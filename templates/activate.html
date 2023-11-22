@@ -8,9 +8,80 @@
     <link rel="stylesheet" href="/static/css/project.css">
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Styles for the modal */
+        .modal {
+            display: block;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            width: 300px;
+            /* Adjust width as needed */
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .modal-content p {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .modal-content button {
+            padding: 8px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .modal-content button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 
 <body>
+    {% if msg %}
+    <div id="customAlertBox" class="custom-alert">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeAlertBox()">&times;</span>
+            <p id="alertMessage">{{msg}}</p>
+        </div>
+    </div>
+    <script>
+        disableFormInteraction(true);
+        function closeAlertBox() {
+            var alertBox = document.getElementById("customAlertBox");
+            alertBox.style.display = "none";
+            disableFormInteraction(false);
+        }
+
+        function disableFormInteraction(disable) {
+            var form = document.getElementById("myForm");
+            var elements = form.elements;
+            for (var i = 0; i < elements.length; i++) {
+                elements[i].disabled = disable;
+            }
+        }
+    </script>
+    {% endif %}
     <div>
         <h1 class="center">Activate your License</h1>
         <div class="dialog-box">
@@ -20,6 +91,8 @@
                     <input required readonly type="text" id="proj_id" name="proj_id" value="{{id}}">
                     <label for="trans_id">Transaction ID: </label>
                     <input required type="text" id="trans_id" name="trans_id" placeholder="Enter the transation id">
+                    <label for="email">Email ID: </label>
+                    <input required type="email" id="email" name="email" placeholder="Enter your email id">
                     <label for="amount">Amount Paid: </label>
                     <input required type="text" id="amount" name="amount" placeholder="Enter the amount paid in Rs">
                     <label for="plan">Select your plan:</label>
@@ -29,7 +102,7 @@
                         <option value="Day" selected>One Day Plan</option>
                         <option value="Custom" selected>Custom Plan</option>
                     </select>
-                    
+
                     <div class="content">
                         <input type="button" value="Submit" />
                         <p class="descriptive">
@@ -42,7 +115,7 @@
             </form>
         </div>
     </div>
-    <script src="/static/js/script.js"></script>
+    
 </body>
 
 </html>

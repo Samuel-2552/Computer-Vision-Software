@@ -243,11 +243,24 @@ class FlaskThread(QThread):
                 return "Check your Internet Connection!"
             
         
-        @self.flask_app.route('/activate/<int:project_id>')
+        @self.flask_app.route('/activate/<int:project_id>', methods=['GET', 'POST'])
         def activate(project_id):
             sys_id = get_system_id()
-
-            return render_template('activate.html', id=project_id)
+            if request.method == 'POST':
+                trans_id = request.form['trans_id']
+                email = request.form['email']
+                amount = request.form['amount']
+                plan = request.form['plan']
+                user_data = {'sys_id': sys_id, 'project_id': project_id, 'trans_id': trans_id, 'email':email, 'amount':amount, 'plan': plan}
+                web_server_url = 'https://icvs.pythonanywhere.com/transact'  # Replace with your web server URL
+                response = requests.post(web_server_url, json=user_data)
+                if response.status_code == 200:
+                    msg = response.json.get('message')
+                if response.status_code == 400:
+                    msg = response.json.get('message')
+                if response.status_code == 500:
+                    msg = response.json.get('message')
+            return render_template('activate.html', id=project_id, msg=msg)
             
         
         @self.flask_app.route('/projects/images/<string:file_name>')
