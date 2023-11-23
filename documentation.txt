@@ -6,42 +6,17 @@ py -3 -m venv .venv
 
 python -m pip install --upgrade pip
 
-pip install Flask
-
-pip install pyqt5
-
-pip install pyqtwebengine
-
-pip install Flask-Mail
-
-pip install cryptography
-
-pip install lxml
-
-pip install wmi
-
-pip install requests
-
-pip install opencv-python-headless
+pip install -r requirements.txt
 
 
+#copy the below content for config.yaml
 
+path: 
+train: 
 
-if internet is not working manage to work on it.
-
-if folder does not exist create it, other wise error occurs.
-
-show dataset folder instead of videos alone, and process only videos. 
-after which you have to transfer all the images to the destined location and continue with the count for image file name.
-
-
-once the label image is closed have to work on the colab.html to show a popup stating that the window is disabled.
-
-after that we need to teach them how to use the folders and work with colab and get the model
-
-then once that is finished need to redirect to a boilerplate codes. where they can copy generalized code and run their model.
-
-after all the buttons pressed add loader
-
-
-pyinstaller --hidden-import=pyqt5 --hidden-import=lxml --hidden-import=flask -n "ICV Studio" -c app.py -p ./libs -p ./  --add-data "email.db;." --add-data "labeldetails.db;." --add-data "labelimg.db;."  --add-data "templates;templates" --add-data "static;static" --add-data "D:\Github\Computer-Vision-Software:labelImg.py"
+names:
+    0:Face
+    1:Eyes
+    2:Seatbelt
+    3:Tire
+    4:Operator

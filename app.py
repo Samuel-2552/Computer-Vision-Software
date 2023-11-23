@@ -16,6 +16,7 @@ import requests
 import mimetypes
 import cv2
 import subprocess
+import shutil
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -26,6 +27,32 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, relative_path)
+
+def move_txt_files(source_folder, destination_folder):
+    # Ensure both source and destination folders exist
+    if not os.path.exists(source_folder):
+        print(f"Source folder '{source_folder}' does not exist.")
+        return
+    if not os.path.exists(destination_folder):
+        print(f"Destination folder '{destination_folder}' does not exist.")
+        return
+
+    # Get a list of all files in the source folder
+    files = os.listdir(source_folder)
+
+    # Filter out only the .txt files
+    txt_files = [file for file in files if file.endswith('.txt')]
+
+    if not txt_files:
+        print("No .txt files found in the source folder.")
+        return
+
+    # Move each .txt file from the source folder to the destination folder
+    for txt_file in txt_files:
+        source_path = os.path.join(source_folder, txt_file)
+        destination_path = os.path.join(destination_folder, txt_file)
+        shutil.move(source_path, destination_path)
+        print(f"Moved '{txt_file}' to '{destination_folder}'")
 
 def encrypt_message(message, key):
     fernet = Fernet(key)
@@ -250,6 +277,30 @@ class FlaskThread(QThread):
             else:
                 return "Check your Internet Connection!"
             
+        @self.flask_app.route('/model_train/<int:project_id>')
+        def model_train(project_id):
+            sys_id = get_system_id()
+            user_data = {'sys_id': sys_id}
+            web_server_url = 'https://icvs.pythonanywhere.com/get-project'  # Replace with your web server URL
+            response = requests.post(web_server_url, json=user_data)
+            if response.status_code == 200:
+                val=response.json().get('project')
+                details  = val[project_id-1]
+                folder = details[4]
+                folder = folder + "/dataset/images"
+                source_folder_path = folder
+                folder2= details[4]
+                folder2 = folder2 + "/dataset/labels"
+                os.makedirs(folder2, exist_ok=True)
+                destination_folder_path = folder2
+
+                move_txt_files(source_folder_path, destination_folder_path)
+
+                return "<center><h1>All Set for Training the Model</h1></center> "
+            else:
+                return "Network Error"
+
+            
         @self.flask_app.route('/labelimg/<int:project_id>')
         def labelimg(project_id):
             conn = sqlite3.connect(resource_path('labelimg.db'))
@@ -282,7 +333,7 @@ class FlaskThread(QThread):
                 conn.commit()
                 conn.close()  # Close the connection after committing changes
 
-            return render_template('colab.html')
+            return render_template('colab.html', id=project_id)
             
         
         @self.flask_app.route('/activate/<int:project_id>', methods=['GET', 'POST'])

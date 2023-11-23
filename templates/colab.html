@@ -1,11 +1,125 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Open Google Colab</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/index.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        /* Styles for the modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            width: 300px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .modal-content p {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .modal-content button {
+            padding: 8px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .modal-content button:hover {
+            background-color: #0056b3;
+        }
+
+        textarea {
+            resize: none;
+            width: 400px;
+            height: 60px;
+            overflow: auto;
+        }
+    </style>
+
+    <title>Industrial CV Software</title>
 </head>
+
 <body>
-    <h1>Tutorial Page</h1>
+    <center>
+        <h1>Industrial CV Software</h1>
+    </center>
+
+    <div class="loading-screen" id="loadingScreen">
+        <p id="loadingMessage">Submitting...</p>
+        <div class="loading-dots"></div>
+    </div>
+
+    <div id="customAlertBox" class="custom-alert">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeAlertBox()">&times;</span>
+            <p id="alertMessage">This Window is disabled till you close the annotation window.</p>
+        </div>
+    </div>
+
+    <div class="flex-container">
+
+        <button id="myForm" onclick="location.href='/model_train/{{id}}'"> Finish Annotation </button>
+
+    </div>
+
+    <!-- <footer>
+        <p>
+            This application is not licensed and have only 3 months of free trial
+        </p>
+    </footer> -->
+
+    <script>
+        var alertBox = document.getElementById("customAlertBox");
+        var alertMessage = document.getElementById("alertMessage");
+        alertMessage.innerHTML = message;
+        alertBox.style.display = "block";
+
+        function closeAlertBox() {
+            var alertBox = document.getElementById("customAlertBox");
+            alertBox.style.display = "none";
+        }
+
+        document.getElementById('myForm').addEventListener('click', function (event) {
     
-    <h3>Please close the Annotation window for this window to enable.</h3>
+    // Show loading screen
+    document.getElementById('loadingScreen').style.display = 'flex';
+
+    // Simulate submission delay (You can replace this with actual form submission logic)
+    setTimeout(function () {
+        // Hide loading screen after a delay (simulating submission success)
+        document.getElementById('loadingScreen').style.display = 'none';
+        
+    }, 10000); // Replace 3000 with your desired delay in milliseconds
+});
+
+    </script>
+
 </body>
+
 </html>
